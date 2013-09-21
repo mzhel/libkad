@@ -1,0 +1,35 @@
+[CLangCompiler]
+SOURCES=./src/libkad.c
+OBJDIR=./obj/
+INCLUDE=./src;./extrn/linuxmods
+Release:
+KEYS=-fpack-struct=1
+Debug:
+KEYS=-ggdb -fpack-struct=1 
+Verbose:
+DEFINE=CONFIG_VERBOSE
+Profile:
+DEFINE=EXIT_TIMER
+Daemon:
+DEFINE=RUN_AS_DAEMON
+[CLangLinker]
+TARGETNAME=libkad
+TARGETDIR=./bin/
+KEYS= -shared
+Shared:
+LIBS= c rt
+Static:
+LIBS=c rt
+STATIC_LIBS=./lib/libevent_core.a ./lib/libevent_extra.a
+
+[Cleaner]
+DIRS=./;./obj/
+EXTS=*.o;*.dat
+
+Build >> [CLangCompiler,CLangLinker]
+Clean >> [Cleaner]
+
+BuildTest == [Build Debug Verbose Shared]
+BuildSend == [Build Release Static Daemon]
+BuildTestDaemon == [Build Debug Shared Daemon]
+default == [Build Debug Verbose]
