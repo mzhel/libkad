@@ -1,11 +1,13 @@
 [CLangCompiler]
 SOURCES=uint128_tests.c \
+        ../src/uint128.c \
         ../src/random.c \
         ../src/polarssl/havege.c \
         ../src/polarssl/timing.c \
+        ../extrn/common-code/log.c \
         ../src/cmockery/cmockery.c
 OBJDIR=./obj/
-INCLUDE=../src;../src/polarssl/include;../src/cmockery/google;../extrn/linuxmods
+INCLUDE=../src;../src/polarssl/include;../src/cmockery/google;../extrn/common-code
 Release:
 KEYS=-fpack-struct=1
 Debug:

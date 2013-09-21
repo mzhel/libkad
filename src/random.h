@@ -4,13 +4,13 @@
 void
 random_init();
 
-void
+uint32_t
 random_uint32();
 
-void
+uint16_t
 random_uint16();
 
-void
+uint8_t
 random_uint8();
 
 #endif // _RANDOM_H_

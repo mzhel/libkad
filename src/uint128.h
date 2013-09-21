@@ -15,4 +15,32 @@ typedef struct _uint128 {
   } data;
 } UINT128;
 
+uint32_t
+uint128_generate(UINT128* ui128);
+
+uint32_t
+uint128_from_buffer(
+                    UINT128* ui128,
+                    uint8_t* buffer,
+                    uint32_t bufferLen,
+                    bool bigEndian
+                    );
+
+uint32_t
+uint128_xor(
+            UINT128* first, 
+            UINT128* second, 
+            UINT128* xorRes
+            );
+
+#ifdef CONFIG_VERBOSE
+
+#define LOG_DEBUG_UINT128(str, ui128) LOG_DEBUG("%s %.8x%.8x%.8x%.8x", str, ui128->data.dwordData[0], ui128->data.dwordData[1], ui128->data.dwordData[2], ui128->data.dwordData[3]);
+
+#else
+
+#define LOG_DEBUG_UINT128(str, id)
+
+#endif
+
 #endif // _UINT128_H_
