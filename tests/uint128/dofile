@@ -1,13 +1,13 @@
 [CLangCompiler]
 SOURCES=uint128_tests.c \
-        ../src/uint128.c \
-        ../src/random.c \
-        ../src/polarssl/havege.c \
-        ../src/polarssl/timing.c \
-        ../extrn/common-code/log.c \
-        ../src/cmockery/cmockery.c
+        ../../src/uint128.c \
+        ../../src/random.c \
+        ../../src/polarssl/havege.c \
+        ../../src/polarssl/timing.c \
+        ../../extrn/common-code/log.c \
+        ../../src/cmockery/cmockery.c
 OBJDIR=./obj/
-INCLUDE=../src;../src/polarssl/include;../src/cmockery/google;../extrn/common-code
+INCLUDE=../../src;../../src/polarssl/include;../../src/cmockery/google;../../extrn/common-code
 Release:
 KEYS=-fpack-struct=1
 Debug:
@@ -19,8 +19,8 @@ DEFINE=EXIT_TIMER
 Daemon:
 DEFINE=RUN_AS_DAEMON
 [CLangLinker]
-TARGETNAME=libkad_tests
-TARGETDIR=../bin/
+TARGETNAME=uint128_tests
+TARGETDIR=../../bin/
 Shared:
 LIBS= c rt
 Static:
