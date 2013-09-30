@@ -12,9 +12,9 @@ uint128_generate(UINT128* ui128)
 
   do {
 
-    for (i = 0; i < UINT128_BYTES_COUNT; i++) {
+    for (i = 0; i < UINT128_DWORDS_COUNT; i++) {
 
-      ui128->data.byteData[i] = random_uint8();
+      ui128->data.dwordData[i] = random_uint32();
 
     }
 
@@ -141,6 +141,46 @@ uint128_get_bit_string(
       dw = ui128->data.dwordData[i];
 
       for (int8_t j = 31; j >= 0; j--) {
+
+        bit_str_buf[k++] = ((dw & (1 << j))?1:0) + 0x30;
+
+      }
+
+    }
+    
+    result = 1;
+
+  } while (false);
+
+  return result;
+
+}
+
+uint8_t
+uint128_get_bit_string_reverse(
+                               UINT128* ui128,
+                               char* bit_str_buf,
+                               uint32_t bit_str_buf_len
+                               )
+{
+  uint8_t result = 0;
+  uint32_t needed_len = 0;
+  uint32_t dw;
+  uint32_t k = 0;
+  
+  do {
+      
+    if (!ui128 || !bit_str_buf) break;
+
+    needed_len = UINT128_BYTES_COUNT * 8 + 1;
+
+    if (bit_str_buf_len < needed_len) break;
+
+    for (int8_t i = UINT128_DWORDS_COUNT - 1; i >= 0; i--) {
+
+      dw = ui128->data.dwordData[i];
+
+      for (int8_t j = 0; j < 32; j++) {
 
         bit_str_buf[k++] = ((dw & (1 << j))?1:0) + 0x30;
 

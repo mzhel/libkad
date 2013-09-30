@@ -45,6 +45,13 @@ node_update_expired(
                     KAD_NODE* kn
                    );
 
+uint8_t
+node_set_udp_key_with_ip(
+                         KAD_NODE* kn,
+                         uint32_t udp_key,
+                         uint32_t ip4_no
+                        );
+
 uint32_t
 node_get_udp_key_by_ip(
                        KAD_NODE* kn,

@@ -200,6 +200,8 @@ kbucket_node_by_ip_port(
 
     if (!found) break;
 
+    result = 1;
+
   } while (false);
 
   *kn_out = kn;

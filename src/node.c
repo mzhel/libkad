@@ -67,7 +67,7 @@ node_create(
 
     LOG_DEBUG_UINT128("distance", dist);
 
-    kn = (KAD_NODE*) mem_alloc(sizeof(KAD_NODE));
+    kn = (KAD_NODE*)mem_alloc(sizeof(KAD_NODE));
 
     if (!kn) {
 
@@ -126,7 +126,7 @@ node_destroy(
              KAD_NODE* kn
             )
 {
-  uint8_t result = 0;;
+  uint8_t result = 0;
 
   do {
 

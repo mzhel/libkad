@@ -53,6 +53,13 @@ uint128_get_bit_string(
                       );
 
 uint8_t
+uint128_get_bit_string_reverse(
+                               UINT128* ui128,
+                               char* bit_str_buf,
+                               uint32_t bit_str_buf_len
+                               );
+
+uint8_t
 uint128_get_bit_value(
                       UINT128* ui128,
                       uint32_t bitIdx
