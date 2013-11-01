@@ -112,3 +112,60 @@ str_wide_len(
 
   return result;
 }
+
+uint8_t
+str_wide_cmp(
+             wchar_t* str1,
+             wchar_t* str2
+            )
+{
+  uint8_t result = 0;
+  uint32_t len1 = 0;
+  uint32_t len2 = 0;
+
+  do {
+    
+    if (!str1 || !str2) break;
+
+    len1 = str_wide_len((char*)str1);
+
+    len2 = str_wide_len((char*)str2);
+
+    if (len1 > len2) {
+
+      result = 1;
+
+      break;
+
+    }
+
+    if (len1 < len2){
+
+      result = 0xff;
+
+      break;
+
+    }
+
+    for (uint32_t i = 0; i < len1; i++){
+
+      if (str1[i] > str2[i]) {
+
+        result = 1;
+
+        break;
+
+      } else if (str1[i] < str2[i]) {
+
+        result = 0xff;
+
+        break;
+
+      }
+
+    }
+
+  } while (false);
+
+  return result;
+}

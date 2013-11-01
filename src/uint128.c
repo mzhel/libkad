@@ -62,7 +62,7 @@ uint128_from_buffer(
 }
 
 uint32_t
-uint128_xor(UINT128* first, UINT128* second, UINT128* xorRes)
+uint128_xor(UINT128* first, UINT128* second, UINT128* xor_res)
 {
   uint32_t result = 0;
   uint8_t i;
@@ -71,11 +71,11 @@ uint128_xor(UINT128* first, UINT128* second, UINT128* xorRes)
 
     if (!first || !second) break;
 
-    if (!xorRes) xorRes = first;
+    if (!xor_res) xor_res = first;
 
     for (i = 0; i < UINT128_DWORDS_COUNT; i++){
 
-      xorRes->data.dwordData[i] = first->data.dwordData[i] ^ second->data.dwordData[i];
+      xor_res->data.dwordData[i] = first->data.dwordData[i] ^ second->data.dwordData[i];
 
     }
 

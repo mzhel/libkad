@@ -3,14 +3,14 @@
 
 // opcodes
 
-#define KADEMLIA_BOOTSTRAP_ERQ      0x00
+#define KADEMLIA_BOOTSTRAP_REQ      0x00
 #define KADEMLIA_BOOTSTRA_RES       0x08
 #define KADEMLIA_HELLO_REQ          0x10
 #define KADEMLIA_HELLO_RES          0x18
 #define KADEMLIA_REQ                0x20
 #define KADEMLIA_RES                0x28
 #define KADEMLIA_SEARCH_REQ         0x30
-#define KADMLIA_SEARCH_NOTES_REQ    0x32
+#define KADEMLIA_SEARCH_NOTES_REQ   0x32
 #define KADEMLIA_SEARCH_RES         0x38
 #define KADEMLIA_SEARCH_NOTES_RES   0x3a
 #define KADEMLIA_PUBLISH_REQ        0x40
@@ -42,7 +42,7 @@
 #define KADEMLIA2_PUBLISH_NOTES_REQ 0x45
 #define KADEMLIA2_PUBLISH_RES       0x4b
 #define KADEMLIA2_PUBLISH_RES_ACK   0x4c
-#define KADEMLIA2_FIREWALLED2_REQ   0x53
+#define KADEMLIA2_FIREWALLED_REQ    0x53
 #define KADEMLIA2_PING              0x60
 #define KADEMLIA2_PONG              0x61
 #define KADEMLIA2_FIREWALLUDP       0x62

@@ -56,6 +56,20 @@ test_str_utf8_to_unicode(void** state)
 
 }
 
+void
+test_str_wide_cmp(void** state)
+{
+  
+  assert_int_equal(1, str_wide_cmp(L"string", L"strin"));
+
+  assert_int_equal(0xff, str_wide_cmp(L"word", L"words"));
+
+  assert_int_equal(0, str_wide_cmp("unit", "unit"));
+
+  assert_int_equal(0xff, str_wide_cmp("glow", "grow"));
+
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -68,7 +82,8 @@ int main(int argc, char* argv[])
   const UnitTest tests[] = {
     unit_test(test_success),
     unit_test(test_str_unicode_to_utf8),
-    unit_test(test_str_utf8_to_unicode)
+    unit_test(test_str_utf8_to_unicode),
+    unit_test(test_str_wide_cmp)
   };
 
   return run_tests(tests);

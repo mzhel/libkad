@@ -22,4 +22,10 @@ str_wide_len(
              char* str
             );
 
+uint8_t
+str_wide_cmp(
+             wchar_t* str1,
+             wchar_t* str2
+            );
+
 #endif

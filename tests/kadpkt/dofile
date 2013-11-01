@@ -1,23 +1,27 @@
 [CLangCompiler]
-SOURCES=str_tests.c \
+SOURCES=kadpkt_tests.c \
+        ../../src/kadpkt.c \
+        ../../src/pktasm.c \
+        ../../src/tag.c \
+        ../../src/packet.c \
         ../../src/routing.c \
         ../../src/node.c \
         ../../src/nodelist.c \
         ../../src/kbucket.c \
+        ../../src/str.c \
         ../../src/ticks.c \
         ../../src/uint128.c \
         ../../src/random.c \
-        ../../src/str.c \
+        ../../src/polarssl/havege.c \
+        ../../src/polarssl/timing.c \
         ../../extrn/common-code/list.c \
+        ../../extrn/common-code/queue.c \
         ../../extrn/common-code/mem.c \
         ../../extrn/common-code/log.c \
-        ../../extrn/polarssl/library/timing.c \
-        ../../extrn/polarssl/library/havege.c \
         ../../src/cmockery/cmockery.c
 OBJDIR=./obj/
-INCLUDE=../../src;../../extrn/polarssl/include;../../src/cmockery/google;../../extrn/common-code
+INCLUDE=../../src;../../src/polarssl/include;../../src/cmockery/google;../../extrn/common-code
 KEYS=-fshort-wchar
-DEFINE=POLARSSL_HAVEGE_C POLARSSL_MD4_C
 Release:
 KEYS=-fpack-struct=1
 Debug:
@@ -29,9 +33,9 @@ DEFINE=EXIT_TIMER
 Daemon:
 DEFINE=RUN_AS_DAEMON
 [CLangLinker]
-TARGETNAME=str_tests
+TARGETNAME=kadpkt_tests
 TARGETDIR=../../bin/
-LIBS= cgraph cdt
+LIBS= graph cdt
 Shared:
 LIBS= c rt
 Static:

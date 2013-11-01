@@ -89,6 +89,30 @@ test_tag_create_emit_read_destroy3(void** state)
 
 }
 
+void test_tag_string(void** state)
+{
+  TAG* tag = NULL;
+  uint8_t buf[1024];
+  uint32_t bytes_emited = 0;
+  uint32_t bytes_read = 0;
+  uint32_t len = 0;
+
+  memset(buf, 0, sizeof(buf));
+
+  assert_true(tag_create(TAGTYPE_STRING, 0, L"TestTag",(uint64_t)"TestTagData", &tag));
+
+  assert_true(tag_string_get_len(tag, &len));
+
+  assert_int_equal(11, len);
+
+  assert_true(tag_string_get_data(tag, buf, sizeof(buf)));
+
+  assert_memory_equal(buf, "TestTagData", strlen("TestTagData"));
+
+  assert_true(tag_destroy(tag));
+
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -102,7 +126,8 @@ int main(int argc, char* argv[])
     unit_test(test_success),
     unit_test(test_tag_create_emit_read_destroy),
     unit_test(test_tag_create_emit_read_destroy2),
-    unit_test(test_tag_create_emit_read_destroy3)
+    unit_test(test_tag_create_emit_read_destroy3),
+    unit_test(test_tag_string)
   };
 
   return run_tests(tests);

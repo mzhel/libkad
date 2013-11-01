@@ -61,7 +61,7 @@
 #define TAG_MEDIA_LENGTH  L"\xd3" // <uint32>
 #define TAG_MEDIA_BITRATE L"\xd4" // <uint32>
 #define TAG_MEDIA_CODEC   L"\xd5" // <string>
-#define TAG_MISCOPTIONS   L"\xf2" // <uint8>
+#define TAG_KADMISCOPTIONS   L"\xf2" // <uint8>
 #define TAG_ENCRYPTION    L"\xf3" // <uint8>
 #define TAG_FILERATING    L"\xf7" // <uint8>
 #define TAG_BUDDYHASH     L"\xf8" // <string>
@@ -139,10 +139,10 @@ tag_destroy(
            );
 
 bool
-tag_cal_buf_size(
-                 TAG* tag,
-                 uint32_t* size_out
-                );
+tag_calc_buf_size(
+                  TAG* tag,
+                  uint32_t* size_out
+                 );
 
 bool
 tag_emit(
@@ -169,5 +169,60 @@ tag_read(
          uint8_t** after_tag_out,
          uint32_t* bytes_read_out
         );
+
+bool
+tag_string_get_len(
+                   TAG* tag,
+                   uint32_t* len_out
+                  );
+
+bool
+tag_string_get_data(
+                    TAG* tag,
+                    uint8_t* buf,
+                    uint32_t buf_len
+                   );
+
+bool
+tag_get_name(
+             TAG* tag,
+             wchar_t* buf,
+             uint32_t buf_len
+            );
+
+bool
+tag_get_id(
+           TAG* tag,
+           uint32_t* id_out
+          );
+
+bool
+tag_is_integer(
+               TAG* tag
+              );
+
+bool
+tag_get_integer(
+                TAG* tag,
+                uint64_t* int_out
+               );
+
+bool
+tag_is_bsob(
+            TAG* tag
+           );
+
+bool
+tag_bsob_get_len(
+                 TAG* tag,
+                 uint32_t* len_out
+                );
+
+bool
+tag_bsob_get_data(
+                  TAG* tag,
+                  uint8_t* buf,
+                  uint32_t buf_len
+                 );
 
 #endif // _TAG_H_

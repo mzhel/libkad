@@ -1,18 +1,31 @@
 [CLangCompiler]
-SOURCES=str_tests.c \
+SOURCES=kadfw_tests.c \
+        ../../src/kadfw.c \
+        ../../src/kadsrch.c \
+        ../../src/kad.c \
+        ../../src/kadses.c \
+        ../../src/kadqpkt.c \
+        ../../src/kadproto.c \
+        ../../src/kadpkt.c \
+        ../../src/kadhlp.c \
+        ../../src/pktasm.c \
+        ../../src/tag.c \
+        ../../src/packet.c \
         ../../src/routing.c \
         ../../src/node.c \
         ../../src/nodelist.c \
         ../../src/kbucket.c \
+        ../../src/str.c \
         ../../src/ticks.c \
         ../../src/uint128.c \
         ../../src/random.c \
-        ../../src/str.c \
         ../../extrn/common-code/list.c \
+        ../../extrn/common-code/queue.c \
         ../../extrn/common-code/mem.c \
         ../../extrn/common-code/log.c \
         ../../extrn/polarssl/library/timing.c \
         ../../extrn/polarssl/library/havege.c \
+        ../../extrn/polarssl/library/md4.c \
         ../../src/cmockery/cmockery.c
 OBJDIR=./obj/
 INCLUDE=../../src;../../extrn/polarssl/include;../../src/cmockery/google;../../extrn/common-code
@@ -29,7 +42,7 @@ DEFINE=EXIT_TIMER
 Daemon:
 DEFINE=RUN_AS_DAEMON
 [CLangLinker]
-TARGETNAME=str_tests
+TARGETNAME=kadfw_tests
 TARGETDIR=../../bin/
 LIBS= cgraph cdt
 Shared:

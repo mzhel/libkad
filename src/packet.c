@@ -19,7 +19,7 @@ pkt_create(
 
   do {
 
-    if (!data_size || !data) break;
+    if (data_size && !data) break;
 
     pkt = (KAD_PACKET*)mem_alloc(data_size + (sizeof(KAD_PACKET) - 1));
 

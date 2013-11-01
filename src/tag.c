@@ -221,10 +221,10 @@ tag_destroy(
 }
 
 bool
-tag_cal_buf_size(
-                 TAG* tag,
-                 uint32_t* size_out
-                )
+tag_calc_buf_size(
+                  TAG* tag,
+                  uint32_t* size_out
+                 )
 {
   bool result = false;
   uint32_t size = 0;
@@ -307,7 +307,7 @@ tag_emit(
 
     if (!tag || !buf) break;
 
-    if (!tag_cal_buf_size(tag, &calc_size) || buf_size < calc_size) break;
+    if (!tag_calc_buf_size(tag, &calc_size) || buf_size < calc_size) break;
 
     p = buf;
 
@@ -718,3 +718,248 @@ tag_read(
   return result;
 }
 
+bool
+tag_string_get_len(
+                   TAG* tag,
+                   uint32_t* len_out
+                  )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || !len_out) break; 
+
+    if (tag->type != TAGTYPE_STRING) break;
+
+    *len_out = ((TAG_STRING*)((uint8_t*)tag + tag->data_offset))->len;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_string_get_data(
+                    TAG* tag,
+                    uint8_t* buf,
+                    uint32_t buf_len
+                   )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || !buf || !buf_len) break;
+
+    if (tag->type != TAGTYPE_STRING) break;
+
+    if (!str_unicode_to_utf8(
+                             ((TAG_STRING*)((uint8_t*)tag + tag->data_offset))->data,
+                             ((TAG_STRING*)((uint8_t*)tag + tag->data_offset))->len,
+                             (char*)buf,
+                             buf_len
+                            )
+    ){
+
+      LOG_ERROR("String conversion failed.");
+
+      break;
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_get_name(
+             TAG* tag,
+             wchar_t* buf,
+             uint32_t buf_len
+            )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || !buf) break;
+
+    if (tag->name_len > buf_len) break;
+
+    memcpy(buf, tag->name, tag->name_len * 2);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_get_id(
+           TAG* tag,
+           uint32_t* id_out
+          )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || !id_out) break;
+
+    if (!tag->name_id) break;
+
+    *id_out = tag->name_id;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_is_integer(
+               TAG* tag
+              )
+{
+  bool result = false;
+  uint8_t t = 0;
+
+  do {
+
+    if (!tag) break;
+
+    t = tag->type;
+
+    if (!(t == TAGTYPE_UINT64 || t ==TAGTYPE_UINT32 || t == TAGTYPE_UINT16 || t == TAGTYPE_UINT8)) break;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_get_integer(
+                TAG* tag,
+                uint64_t* int_out
+               )
+{
+  bool result = false;
+  uint8_t* p = NULL;
+  uint32_t int_size = 0;
+
+  do {
+
+    if (!tag || !int_out) break;
+
+    switch(tag->type){
+
+      case TAGTYPE_UINT64:
+
+        int_size = 8;
+
+        break;
+
+      case TAGTYPE_UINT32:
+
+        int_size = 4;
+
+        break;
+
+      case TAGTYPE_UINT16:
+
+        int_size = 2;
+
+        break;
+
+      case TAGTYPE_UINT8:
+
+        int_size = 1;
+
+        break;
+
+    }
+
+    memcpy(int_out, (uint8_t*)tag + tag->data_offset, int_size);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_is_bsob(
+            TAG* tag
+           )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || tag->type != TAGTYPE_BSOB) break;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_bsob_get_len(
+                 TAG* tag,
+                 uint32_t* len_out
+                )
+{
+  bool result = false;
+
+  do {
+
+    if (!tag || !len_out || tag->type != TAGTYPE_BSOB) break;
+
+    *len_out = ((TAG_BSOB*)((uint8_t*)tag + tag->data_offset))->len;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+tag_bsob_get_data(
+                  TAG* tag,
+                  uint8_t* buf,
+                  uint32_t buf_len
+                 )
+{
+  bool result = false;
+  uint32_t bsob_len = 0;
+
+  do {
+
+    if (!tag || !buf) break;
+
+    bsob_len = ((TAG_BSOB*)((uint8_t*)tag + tag->data_offset))->len;
+
+    if (buf_len < bsob_len) break;
+
+    memcpy(buf, ((TAG_BSOB*)((uint8_t*)tag + tag->data_offset))->data, bsob_len);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
