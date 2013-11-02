@@ -11,6 +11,7 @@
 #include <tag.h>
 #include <protocols.h>
 #include <packet.h>
+#include <kadqpkt.h>
 #include <kadfw.h>
 #include <kadses.h>
 #include <kadproto.h>
@@ -240,6 +241,63 @@ kadhlp_calc_udp_verify_key(
 
   } while (false);
 
+
+  return result;
+}
+
+bool
+kadhlp_gen_udp_key(
+                   uint32_t* udp_key_out
+                  )
+{
+  bool result = false;
+  uint32_t udp_key = 0;
+
+  do {
+
+    if (!udp_key_out) break;
+
+    udp_key = random_uint32();
+
+    *udp_key_out = udp_key;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadhlp_destroy_qpkt_queue(
+                          KAD_SESSION* ks,
+                          QUEUE* q
+                          )
+{
+  bool result = false;
+  KAD_QUEUED_PACKET *qpkt = NULL;
+
+  do {
+
+    if (!q) break;
+
+    do {
+
+      qpkt = NULL;
+
+      DEQ_OUT_UDP(ks, (void**)&qpkt);
+
+      if (!qpkt) break;
+
+      kadqpkt_destroy(qpkt);
+
+    } while (true);
+
+    queue_destroy(q);
+
+    result = true;
+
+  } while (false);
 
   return result;
 }

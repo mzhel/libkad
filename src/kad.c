@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <memory.h>
+#include <netdb.h>
 #include <uint128.h>
 #include <list.h>
 #include <queue.h>
@@ -198,10 +199,17 @@ kad_zone_update_bucket(
 }
 
 bool
-kad_init(KAD_SESSION** ks_out)
+kad_init(
+         uint16_t tcp_port,
+         uint16_t udp_port,
+         KAD_SESSION** ks_out
+         )
 {
   bool result = false;
   KAD_SESSION* ks = NULL;
+  struct hostent* he = NULL;
+  UINT128 zone_idx;
+  uint32_t now = 0;
 
   do {
     
@@ -219,7 +227,84 @@ kad_init(KAD_SESSION** ks_out)
 
     random_init();
 
+    he = gethostbyname(NULL);
+
+    ks->loc_ip4_no = *(uint32_t*)he->h_addr;
+
+    kad_fw_set_status(&ks->fw, true);
+
+    kad_fw_set_status_udp(&ks->fw, true);
+
+    for (uint32_t i = 0; i < sizeof(ks->user_hash); i++){
+
+      ks->user_hash[i] = random_uint8();
+
+    }
+
+    ks->user_hash[5] = 14;
+
+    ks->user_hash[14] = 111;
+
+    kadhlp_gen_udp_key(&ks->udp_key);
+
+    ks->udp_port = udp_port;
+
+    ks->tcp_port = tcp_port;
+
+    uint128_init(&zone_idx, 0);
+
+    routing_create_zone(NULL, 0, &zone_idx, &ks->root_zone);
+
+    list_add_entry(&ks->active_zones, ks->root_zone);
+
+    now = ticks_now_ms();
+
+    ks->timers.self_lookup = now + MIN2MS(3);
+
+    ks->timers.udp_port_lookup = now;
+
+    ks->timers.nodes_count_check = now + SEC2MS(10);
+
+    ks->opts.use_extrn_udp_port = true;
+
+    queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_in_udp);
+
+    queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_out_udp);
+  
     *ks_out = ks;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kad_uninit(
+           KAD_SESSION* ks
+           )
+{
+  bool result = false;
+
+
+  do {
+
+    kadhlp_destroy_qpkt_queue(ks, ks->queue_in_udp);
+
+    kadhlp_destroy_qpkt_queue(ks, ks->queue_out_udp);
+
+    routing_destroy_zone(ks->root_zone);
+
+    list_destroy(ks->active_zones, false);
+
+    kad_search_delete_all_from_ongoing(&ks->searches);
+
+    list_destroy(ks->searches, false);
+
+    kad_fw_destroy(&ks->fw);
+
+    mem_free(ks);
 
     result = true;
 

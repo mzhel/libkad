@@ -32,4 +32,15 @@ kadhlp_calc_udp_verify_key(
                            uint32_t* verify_key_out
                           );
 
+bool
+kadhlp_gen_udp_key(
+                   uint32_t* udp_key_out
+                  );
+
+bool
+kadhlp_destroy_qpkt_queue(
+                          KAD_SESSION* ks,
+                          QUEUE* q
+                         );
+
 #endif // _KADHLP_H_

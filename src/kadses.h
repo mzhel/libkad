@@ -3,6 +3,14 @@
 
 #define KADEMLIA_VERSION 0x08
 
+#define CONTROL_PACKET_QUEUE_LENGTH 64
+
+#define DATA_PACKET_QUEUE_LENGTH 64
+
+typedef struct _kad_opts {
+  bool use_extrn_udp_port;
+} KAD_OPTS;
+
 typedef struct _kad_session_timers {
   uint32_t udp_port_lookup;
   uint32_t self_lookup;
@@ -16,6 +24,7 @@ typedef struct _kad_session_timers {
 
 typedef struct _kad_session {
   UINT128 kad_id;
+  uint8_t user_hash[16];
   uint32_t udp_key;
   ROUTING_ZONE* root_zone;
   LIST* active_zones;
@@ -28,6 +37,7 @@ typedef struct _kad_session {
   uint16_t udp_port;
   KAD_FW fw;
   KAD_SESSION_TIMERS timers;
+  KAD_OPTS opts;
 } KAD_SESSION;
 
 uint32_t
