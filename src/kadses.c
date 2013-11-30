@@ -28,7 +28,6 @@ kadses_get_pub_ip(
 bool
 kadses_create_queue_udp_pkt(
                             KAD_SESSION* ks,
-                            UINT128* self_kad_id,
                             uint32_t ip4_no,
                             uint16_t port_no,
                             UINT128* target_id,
@@ -43,7 +42,6 @@ kadses_create_queue_udp_pkt(
   do {
 
     if (!kadqpkt_create_udp(
-                            self_kad_id,
                             ip4_no,
                             port_no,
                             target_id,

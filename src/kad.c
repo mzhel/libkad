@@ -149,7 +149,6 @@ kad_zone_update_bucket(
 
         if (!kadses_create_queue_udp_pkt(
                                          ks,
-                                         &ks->kad_id,
                                          kn->ip4_no,
                                          kn->udp_port_no,
                                          &kn->id,
@@ -169,7 +168,6 @@ kad_zone_update_bucket(
 
         if (!kadses_create_queue_udp_pkt(
                                          ks,
-                                         &ks->kad_id,
                                          kn->ip4_no,
                                          kn->udp_port_no,
                                          NULL,

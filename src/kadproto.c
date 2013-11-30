@@ -63,7 +63,7 @@ kadproto_kademlia2_bootstrap_req(
 
     }
 
-    if (!kadqpkt_create_udp(&ks->kad_id, ip4_no, port_no, NULL, sender_key, bs_pkt, bs_pkt_len, &qp)){
+    if (!kadqpkt_create_udp(ip4_no, port_no, NULL, sender_key, bs_pkt, bs_pkt_len, &qp)){
 
       LOG_ERROR("Failed to create bootstrap response packet.");
 
@@ -361,7 +361,7 @@ kadproto_kademlia2_req(
 
     }
 
-    if (!kadqpkt_create_udp(&ks->kad_id, ip4_no, port_no, NULL, sender_key, resp_pkt, resp_pkt_len, &qp)){
+    if (!kadqpkt_create_udp(ip4_no, port_no, NULL, sender_key, resp_pkt, resp_pkt_len, &qp)){
 
       LOG_ERROR("Failed to create bootstrap response packet.");
 
@@ -618,7 +618,7 @@ kadproto_kademlia_ping(
 
       }
 
-      if (!kadses_create_queue_udp_pkt(ks, &ks->kad_id, ip4_no, port_no, NULL, sender_key, &pkt, pkt_len)){
+      if (!kadses_create_queue_udp_pkt(ks, ip4_no, port_no, NULL, sender_key, &pkt, pkt_len)){
 
         LOG_ERROR("Failed to queue pong packet.");
 
@@ -880,7 +880,7 @@ kadproto_kademlia2_hello_req(
 
     }
 
-    if (!kadses_create_queue_udp_pkt(ks, &ks->kad_id, ip4_no, port_no, NULL, sndr_key, pkt, pkt_len)){
+    if (!kadses_create_queue_udp_pkt(ks, ip4_no, port_no, NULL, sndr_key, pkt, pkt_len)){
 
       LOG_ERROR("Failed ot queue hello resp packet.");
 
@@ -1020,7 +1020,7 @@ kadproto_kademlia2_hello_res(
 
       }
 
-      if (!kadses_create_queue_udp_pkt(ks, &ks->kad_id, ip4_no, port_no, NULL, sndr_key, pkt, pkt_len)){
+      if (!kadses_create_queue_udp_pkt(ks, ip4_no, port_no, NULL, sndr_key, pkt, pkt_len)){
 
         LOG_ERROR("Failed to queue hello ack packet.");
 

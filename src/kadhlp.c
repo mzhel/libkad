@@ -121,7 +121,6 @@ kadhlp_send_ping_pkt_to_node(
 
     if (!kadses_create_queue_udp_pkt(
                                      ks, 
-                                     &ks->kad_id, 
                                      kn->ip4_no, 
                                      kn->udp_port_no, 
                                      &kn->id, 
@@ -199,7 +198,6 @@ kadhlp_send_bootstrap_pkt(
 
     if (!kadses_create_queue_udp_pkt(
                                      ks, 
-                                     &ks->kad_id,
                                      ip4_no,
                                      port_no,
                                      NULL,
@@ -254,7 +252,6 @@ kadhlp_send_bs_req_pkt_to_rand_node(
 
     if (!kadses_create_queue_udp_pkt(
                                      ks, 
-                                     &ks->kad_id,
                                      kn->ip4_no,
                                      kn->udp_port_no,
                                      &kn->id,

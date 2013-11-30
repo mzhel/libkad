@@ -465,7 +465,6 @@ kad_search_send_find_node_pkt(
 
     if (!kadses_create_queue_udp_pkt(
                                      ks,
-                                     &ks->kad_id,
                                      kn->ip4_no,
                                      kn->udp_port_no,
                                      &kn->id,
@@ -549,6 +548,8 @@ kad_search_start(
     routing_get_closest_to(rz, 3, 50, id_to_find, &dist, true, &kse->nodes_in_use, true);
 
     list_entries_count(kse->nodes_in_use, &kn_cnt);
+
+    LOG_DEBUG("(%d) closest nodes found: %d", kse->id, kn_cnt);
 
     if (!kn_cnt){
 
@@ -1222,7 +1223,7 @@ kad_search_process_last_node_response(
 
         }
 
-        if (kadses_create_queue_udp_pkt(ks, &ks->kad_id, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
+        if (kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
 
           LOG_ERROR("(%d) Failed to queue search request packet.", kse->id);
 
@@ -1258,7 +1259,7 @@ kad_search_process_last_node_response(
 
         }
 
-        if (kadses_create_queue_udp_pkt(ks, &ks->kad_id, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
+        if (kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
 
           LOG_ERROR("(%d) Failed to queue search source request packet.");
 

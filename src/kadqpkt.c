@@ -76,7 +76,6 @@ kadqpkt_destroy(
 
 bool
 kadqpkt_create_udp(
-                   UINT128* self_kad_id,
                    uint32_t ip4_no,
                    uint16_t port_no,
                    UINT128* target_id,
@@ -91,7 +90,7 @@ kadqpkt_create_udp(
 
   do {
 
-    if (!self_kad_id || !pkt || !pkt_len) break;
+    if (!pkt || !pkt_len) break;
 
     if (!kadqpkt_alloc(ip4_no, port_no, pkt, pkt_len, &qp)){
 
