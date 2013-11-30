@@ -19,10 +19,12 @@
 #include <kadhlp.h>
 #include <kadpkt.h>
 #include <kadqpkt.h>
+#include <kad.h>
 #include <random.h>
 #include <ticks.h>
 #include <cipher.h>
 #include <comprs.h>
+#include <kaddbg.h>
 #include <mem.h>
 #include <log.h>
 
@@ -74,7 +76,7 @@ kad_zone_update_bucket(
 
   do {
 
-    if (!ks || !rz) break;
+    if (!ks || !rz || !rz->kb) break;
 
     kb = rz->kb;
 
@@ -199,11 +201,11 @@ kad_zone_update_bucket(
 }
 
 bool
-kad_init(
-         uint16_t tcp_port,
-         uint16_t udp_port,
-         KAD_SESSION** ks_out
-         )
+kad_session_init(
+                 uint16_t tcp_port,
+                 uint16_t udp_port,
+                 KAD_SESSION** ks_out
+                 )
 {
   bool result = false;
   KAD_SESSION* ks = NULL;
@@ -212,6 +214,12 @@ kad_init(
   uint32_t now = 0;
 
   do {
+
+    LOG_PREFIX("[libkad] ");
+
+    LOG_LEVEL_DEBUG;
+
+    LOG_OUTPUT_CONSOLE;
     
     if (!ks_out) break;
 
@@ -227,13 +235,15 @@ kad_init(
 
     random_init();
 
-    he = gethostbyname(NULL);
+    he = gethostbyname("localhost");
 
     ks->loc_ip4_no = *(uint32_t*)he->h_addr;
 
     kad_fw_set_status(&ks->fw, true);
 
     kad_fw_set_status_udp(&ks->fw, true);
+
+    uint128_generate(&ks->kad_id);
 
     for (uint32_t i = 0; i < sizeof(ks->user_hash); i++){
 
@@ -270,6 +280,8 @@ kad_init(
     queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_in_udp);
 
     queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_out_udp);
+
+    kadhlp_add_nodes_from_file(ks, "nodes.dat");
   
     *ks_out = ks;
 
@@ -281,12 +293,11 @@ kad_init(
 }
 
 bool
-kad_uninit(
-           KAD_SESSION* ks
-           )
+kad_session_uninit(
+                   KAD_SESSION* ks
+                   )
 {
   bool result = false;
-
 
   do {
 
@@ -314,10 +325,10 @@ kad_uninit(
 }
 
 bool
-kad_update(
-           KAD_SESSION* ks,
-           uint32_t now
-          )
+kad_session_update(
+                   KAD_SESSION* ks,
+                   uint32_t now
+                   )
 {
   bool result = false;
   ROUTING_ZONE* rz;
@@ -327,9 +338,9 @@ kad_update(
 
   do {
 
-    now = ticks_now_ms();
-
     if (ks->timers.self_lookup <= now){
+
+      LOG_DEBUG("Self-lookup.");
 
       kad_search_find_node(ks, ks->root_zone, &ks->kad_id, &ks->kad_id, true, &ks->searches);
 
@@ -338,6 +349,8 @@ kad_update(
     }
 
     if (ks->timers.udp_port_lookup <= now && kad_fw_udp_check_running(&ks->fw) && !kad_fw_extrn_port_valid(&ks->fw)){
+
+      LOG_DEBUG("Ping packet to random node.");
 
       kadhlp_send_ping_pkt_to_rand_node(ks);
 
@@ -367,6 +380,8 @@ kad_update(
 
       if (now >= rz->next_lookup_timer){
 
+        LOG_DEBUG("Random lookup.");
+
         kad_zone_random_lookup(ks, rz, &ks->kad_id);
 
         rz->next_lookup_timer = now + HR2MS(1);
@@ -376,6 +391,8 @@ kad_update(
     LIST_EACH_ENTRY_WITH_DATA_END(e);
 
     if (now >= ks->timers.nodes_count_check){
+
+      LOG_DEBUG("Bootstrap packet.");
 
       if (routing_get_nodes_count(ks->root_zone, &kn_cnt, true) && kn_cnt < 200){
 
@@ -391,6 +408,18 @@ kad_update(
 
     zones_locked = false;
 
+    // Jumpstart stalled searches.
+  
+    if (now >= ks->timers.search_jumpstart){
+
+      LOG_DEBUG("Jump-start searches.");
+
+      kad_search_jumpstart_all(ks, &ks->searches);
+
+      ks->timers.search_jumpstart = now + SEC2MS(1);
+
+    }
+
   } while (false);
 
   return result;
@@ -404,16 +433,12 @@ kad_timer(KAD_SESSION* ks)
 
   do {
 
-    kad_update(ks, now);
+    LOG_DEBUG("kad_timer");
 
-    if (now >= ks->timers.search_jumpstart){
+    kad_session_update(ks, now);
 
-      kad_search_jumpstart_all(ks, &ks->searches);
-
-      ks->timers.search_jumpstart = now + SEC2MS(1);
-
-    }
-
+    kad_deq_and_handle_control_packet(ks);
+    
     result = true;
 
   } while (false);
@@ -731,6 +756,8 @@ kad_handle_control_packet(
 bool
 kad_get_control_packet_to_send(
                                KAD_SESSION* ks,
+                               uint32_t* ip4_no_out,
+                               uint16_t* port_no_out,
                                void** pkt_out,
                                uint32_t* pkt_len_out
                                )
@@ -743,15 +770,21 @@ kad_get_control_packet_to_send(
 
   do {
 
-    if (!ks || !pkt_out || !pkt_len_out) break;
+    if (!ks || !ip4_no_out || !port_no_out || !pkt_out || !pkt_len_out) break;
 
     DEQ_OUT_UDP(ks, (void**)&qpkt);
 
     if (!qpkt) break;
 
+    KADDBG_PRINT_QPKT("packet to send:", qpkt, true);
+
     if (qpkt->encrypt){
+
+      LOG_DEBUG("encryption required");
       
       kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &sndr_verify_key);
+
+      LOG_DEBUG("sndr_verify_key = %.8x", sndr_verify_key);
 
       cipher_encrypt_packet(
                             qpkt->pkt, 
@@ -765,6 +798,8 @@ kad_get_control_packet_to_send(
 
     } else {
 
+      LOG_DEBUG("no encryption required");
+
       enc_pkt_len = qpkt->pkt_len;
 
       enc_pkt = (uint8_t*)mem_alloc(enc_pkt_len);
@@ -772,6 +807,12 @@ kad_get_control_packet_to_send(
       if (enc_pkt) memcpy(enc_pkt, qpkt->pkt, enc_pkt_len);
 
     }
+
+    LOG_DEBUG("enc_pkt_len = %.8x", enc_pkt_len);
+
+    *ip4_no_out = qpkt->ip4_no;
+
+    *port_no_out = qpkt->port_no;
 
     *pkt_out = enc_pkt;
 
@@ -855,9 +896,13 @@ kad_deq_and_handle_control_packet(
 
     if (!qpkt) break;
 
+    KADDBG_PRINT_QPKT("received control packet:", qpkt, true);
+
     encrypted = cipher_is_packet_encrypted(qpkt->pkt, qpkt->pkt_len);
 
     if (encrypted){
+
+      LOG_DEBUG("Packet encrypted.");
 
       if (!cipher_decrypt_packet(
                                  qpkt->pkt,
@@ -890,6 +935,8 @@ kad_deq_and_handle_control_packet(
 
     if (compressed){
 
+      LOG_DEBUG("Packet compressed.");
+
       if (!compress_uncompress_packet(
                                       dec_pkt,
                                       dec_pkt_len,
@@ -912,7 +959,9 @@ kad_deq_and_handle_control_packet(
 
     }
 
-    // Here was firewall check start, probably need to stuck it somwhere else.
+    KADDBG_PRINT_QPKT("received control packet:", qpkt, true);
+
+    // Here was firewall check start, probably need to stick it somwhere else.
     
     kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &calc_verify_key);
     

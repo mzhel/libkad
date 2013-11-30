@@ -80,7 +80,7 @@ kadpkt_create_search(
                      UINT128* node_id,
                      void** raw_pkt_out,
                      uint32_t* raw_pkt_len_out
-                    )
+                     )
 {
   bool result = false;
   void* raw_pkt = NULL;
@@ -177,6 +177,8 @@ kadpkt_create_ping(
 
     raw_pkt_len = pkt_length_with_header(kp);
 
+    LOG_DEBUG("raw_pkt_len: %.8x", raw_pkt_len);
+
     raw_pkt = mem_alloc(raw_pkt_len);
 
     if (!raw_pkt){
@@ -194,6 +196,8 @@ kadpkt_create_ping(
       break;
 
     }
+
+    LOG_DEBUG("bytes_emited: %.8x", bytes_emited);
 
     *raw_pkt_out = raw_pkt;
 

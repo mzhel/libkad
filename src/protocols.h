@@ -11,7 +11,6 @@
 #define OP_KADEMLIAPACKEDPROT 0xe5
 #define OP_UDPRESERVEDPROT1   0xa3
 #define OP_UDPRESERVEDPROT2   0xb2
-#define OP_PACKEDPROT         0xd4
 
 #define OP_ED2KV2HEADER       0xf4
 

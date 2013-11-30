@@ -21,6 +21,8 @@ SOURCES=kad_tests.c \
         ../../src/ticks.c \
         ../../src/uint128.c \
         ../../src/random.c \
+        ../../src/kadfile.c \
+        ../../src/kaddbg.c \
         ../../extrn/polarssl/library/havege.c \
         ../../extrn/polarssl/library/timing.c \
         ../../extrn/polarssl/library/md4.c \

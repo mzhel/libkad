@@ -12,7 +12,7 @@ pkt_create(
            uint8_t proto,
            uint8_t opcode,
            KAD_PACKET** pkt_out
-          )
+           )
 {
   bool result = false;
   KAD_PACKET* pkt = NULL;

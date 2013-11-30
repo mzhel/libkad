@@ -16,14 +16,27 @@ kadhlp_find_kn_in_nle_list(
                           );
 
 bool
+kadhlp_send_ping_pkt_to_node(
+                             KAD_SESSION* ks,
+                             KAD_NODE* kn
+                             );
+
+bool
 kadhlp_send_ping_pkt_to_rand_node(
                                   KAD_SESSION* ks
-                                 );
+                                  );
 
 bool
 kadhlp_send_bs_req_pkt_to_rand_node(
                                     KAD_SESSION* ks
-                                   );
+                                    );
+
+bool
+kadhlp_send_bootstrap_pkt(
+                          KAD_SESSION* ks,
+                          uint32_t ip4_no,
+                          uint16_t port_no
+                          );
 
 bool
 kadhlp_calc_udp_verify_key(
@@ -41,6 +54,19 @@ bool
 kadhlp_destroy_qpkt_queue(
                           KAD_SESSION* ks,
                           QUEUE* q
-                         );
+                          );
+
+bool
+kadhlp_parse_nodes_dat(
+                       KAD_SESSION* ks,
+                       char* file_path,
+                       LIST** kn_lst_out
+                       );
+
+bool
+kadhlp_add_nodes_from_file(
+                           KAD_SESSION* ks,
+                           char* file_path
+                           );
 
 #endif // _KADHLP_H_

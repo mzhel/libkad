@@ -4,7 +4,7 @@
 // opcodes
 
 #define KADEMLIA_BOOTSTRAP_REQ      0x00
-#define KADEMLIA_BOOTSTRA_RES       0x08
+#define KADEMLIA_BOOTSTRAP_RES      0x08
 #define KADEMLIA_HELLO_REQ          0x10
 #define KADEMLIA_HELLO_RES          0x18
 #define KADEMLIA_REQ                0x20

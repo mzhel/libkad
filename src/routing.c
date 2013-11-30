@@ -618,8 +618,6 @@ routing_get_random_node(
 
     }
 
-    result = true;
-
   } while (false);
 
   // [LOCK] unlock active zones list

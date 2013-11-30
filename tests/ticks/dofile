@@ -1,14 +1,14 @@
 [CLangCompiler]
-SOURCES=kadsrch_tests.c \
-        ../../src/kadfw.c \
+SOURCES=ticks_tests.c \
         ../../src/comprs.c \
         ../../src/cipher.c \
-        ../../src/kadsrch.c \
         ../../src/kad.c \
         ../../src/kadses.c \
         ../../src/kadqpkt.c \
         ../../src/kadproto.c \
+        ../../src/kadsrch.c \
         ../../src/kadpkt.c \
+        ../../src/kadfw.c \
         ../../src/kadhlp.c \
         ../../src/pktasm.c \
         ../../src/tag.c \
@@ -21,15 +21,17 @@ SOURCES=kadsrch_tests.c \
         ../../src/ticks.c \
         ../../src/uint128.c \
         ../../src/random.c \
+        ../../src/kadfile.c \
+        ../../src/kaddbg.c \
+        ../../extrn/polarssl/library/havege.c \
+        ../../extrn/polarssl/library/timing.c \
+        ../../extrn/polarssl/library/md4.c \
+        ../../extrn/polarssl/library/md5.c \
+        ../../extrn/polarssl/library/arc4.c \
         ../../extrn/common-code/list.c \
         ../../extrn/common-code/queue.c \
         ../../extrn/common-code/mem.c \
         ../../extrn/common-code/log.c \
-        ../../extrn/polarssl/library/timing.c \
-        ../../extrn/polarssl/library/havege.c \
-        ../../extrn/polarssl/library/md4.c \
-        ../../extrn/polarssl/library/md5.c \
-        ../../extrn/polarssl/library/arc4.c \
         ../../extrn/zlib/compress.c \
         ../../extrn/zlib/uncompr.c \
         ../../extrn/zlib/gzclose.c \
@@ -61,7 +63,7 @@ DEFINE=EXIT_TIMER
 Daemon:
 DEFINE=RUN_AS_DAEMON
 [CLangLinker]
-TARGETNAME=kadsrch_tests
+TARGETNAME=ticks_tests
 TARGETDIR=../../bin/
 LIBS= cgraph cdt
 Shared:

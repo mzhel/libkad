@@ -147,6 +147,8 @@ cipher_decrypt_packet(
       if (proto & 2){
 
         // Using rcvr_verify_key
+
+        LOG_DEBUG("using rcvr_verify_key");
         
         proto = 0; // proto for second try if first try was unsuccessfull.
 
@@ -161,6 +163,10 @@ cipher_decrypt_packet(
       } else {
 
         // using node_id
+        
+        LOG_DEBUG("using id");
+
+        LOG_DEBUG_UINT128("id: ", self_id);
         
         proto |= 2;
 
@@ -300,7 +306,7 @@ cipher_encrypt_packet(
                       uint32_t sndr_verify_key,
                       uint8_t** pkt_out_ptr,
                       uint32_t* pkt_out_len_ptr
-                     )
+                      )
 {
   bool result = false;
   uint8_t* pkt_out = NULL;
@@ -331,6 +337,8 @@ cipher_encrypt_packet(
 
     pkt_out_len = 16 + pkt_len;
 
+    LOG_DEBUG("pkt_out_len = %.8x", pkt_out_len);
+
     pkt_out = (uint8_t*)mem_alloc(pkt_out_len);
 
     if (!pkt_out){
@@ -343,9 +351,13 @@ cipher_encrypt_packet(
 
     rand_part = random_uint16();
 
-    // First try to use rcvr_verifiy_key then id
+    LOG_DEBUG("rand_part = %.4x", rand_part);
+
+    // First try to use id the rcvr_verify_key
     
     if (!id && rcvr_verify_key){
+
+      LOG_DEBUG("using rcvr_verify_key");
 
       key_data_len = 6;
 
@@ -357,9 +369,13 @@ cipher_encrypt_packet(
 
     } else if (id){
 
+      LOG_DEBUG("using id");
+
       key_data_len = 18;
 
       uint128_emit(id, key_data, key_data_len);
+
+      LOG_DEBUG_UINT128("id: ", id);
 
       *(uint16_t*)(key_data + sizeof(UINT128)) = rand_part;
 
@@ -381,6 +397,8 @@ cipher_encrypt_packet(
 
       semi_rnd_mrkr = kad_rcvr_key_used?((semi_rnd_mrkr & 0xfe) | 0x02):(semi_rnd_mrkr & 0xfc);
 
+      LOG_DEBUG("semi_rnd_mrkr = %.1x", semi_rnd_mrkr);
+
       switch(semi_rnd_mrkr){
 
         case OP_EMULEPROT:
@@ -388,6 +406,7 @@ cipher_encrypt_packet(
         case OP_KADEMLIAHEADER:
         case OP_UDPRESERVEDPROT1:
         case OP_UDPRESERVEDPROT2:
+        case OP_PACKEDPROT:
 
         break;
 

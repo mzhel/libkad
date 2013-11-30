@@ -16,7 +16,7 @@
 uint32_t
 kadses_get_pub_ip(
                   KAD_SESSION* ks
-                 )
+                  )
 {
   uint32_t result = 0;
 
@@ -35,7 +35,7 @@ kadses_create_queue_udp_pkt(
                             uint32_t verify_key,
                             void* pkt,
                             uint32_t pkt_len
-                           )
+                            )
 {
   bool result = false;
   KAD_QUEUED_PACKET* qp = NULL;

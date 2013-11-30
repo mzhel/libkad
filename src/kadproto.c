@@ -537,7 +537,7 @@ kadproto_kademlia2_res(
 
       } else {
 
-        // [TODO] check before adding if we already have thsi contact with changed ip,
+        // [TODO] check before adding if we already have this contact with changed ip,
         // and if it is exist and pass checks add it to search results.
         
         if (routing_add_node(&ks->active_zones, rz, kn, kadses_get_pub_ip(ks), false, &updated, true)){

@@ -1,5 +1,7 @@
-#ifndef _KAD_H_
-#define _KAD_H_
+#ifndef _LIBKAD_H_
+#define _LIBKAD_H_
+
+typedef struct _kad_session KAD_SESSION;
 
 bool
 kad_session_init(
@@ -21,17 +23,6 @@ kad_session_update(
 
 bool
 kad_timer(KAD_SESSION* ks);
-
-bool
-kad_handle_control_packet(
-                          KAD_SESSION* ks,
-                          uint8_t* pkt,
-                          uint32_t pkt_len,
-                          uint32_t ip4_no,
-                          uint16_t port_no,
-                          bool valid_rcvr_key,
-                          uint32_t sndr_verify_key
-                          );
 
 bool
 kad_get_control_packet_to_send(
@@ -56,4 +47,4 @@ kad_deq_and_handle_control_packet(
                                   KAD_SESSION* ks
                                   );
 
-#endif // _KAD_H_
+#endif //_LIBKAD_H_

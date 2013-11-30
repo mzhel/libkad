@@ -39,6 +39,8 @@ kadqpkt_alloc(
 
     qp->port_no = port_no;
 
+    qp->pkt = pkt;
+
     qp->pkt_len = pkt_len;
 
     qp->ts = ticks_now_ms();
@@ -89,7 +91,7 @@ kadqpkt_create_udp(
 
   do {
 
-    if (!self_kad_id || !target_id || !pkt || !pkt_len) break;
+    if (!self_kad_id || !pkt || !pkt_len) break;
 
     if (!kadqpkt_alloc(ip4_no, port_no, pkt, pkt_len, &qp)){
 

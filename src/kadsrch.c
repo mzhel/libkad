@@ -540,6 +540,12 @@ kad_search_start(
 
     uint128_xor(self_id, id_to_find, &dist);
 
+    LOG_DEBUG_UINT128("self_id: ", self_id);
+
+    LOG_DEBUG_UINT128("id_to_find: ", id_to_find);
+
+    LOG_DEBUG_UINT128("dist:", ((UINT128*)&dist));
+
     routing_get_closest_to(rz, 3, 50, id_to_find, &dist, true, &kse->nodes_in_use, true);
 
     list_entries_count(kse->nodes_in_use, &kn_cnt);
@@ -605,7 +611,7 @@ kad_search_find_node(
                      UINT128* id_to_find,
                      bool complete,
                      LIST** kse_lst_ptr
-                    )
+                     )
 {
   bool result = false;
   KAD_SEARCH* kse = NULL;
@@ -941,7 +947,7 @@ kad_search_process_response(
                             uint16_t udp_port_no,
                             LIST* resp_kn_lst,
                             LIST** kse_lst_ptr
-                           )
+                            )
 {
   bool result = false;
   KAD_SEARCH* kse = NULL;
@@ -1037,7 +1043,7 @@ kad_search_process_response(
 
         // Found responded node.
         // Add node to responded nodes list.
-        // Now node is a part of three lists nodesInUse, nodesTried, nodesResp
+        // Now node is a part of three lists nodes_in_use, nodes_tried, nodes_resp
 
         list_add_entry(&kse->nodes_resp, nle_tried);
 
@@ -1292,7 +1298,7 @@ bool
 kad_search_jump_start(
                       KAD_SESSION* ks,
                       KAD_SEARCH* kse
-                     )
+                      )
 {
   bool result = false;
   uint32_t nodes_to_try_cnt = 0;
@@ -1333,7 +1339,7 @@ kad_search_jump_start(
     nodes_to_try = kse->nodes_to_try;
 
     // Go through all nodes to try for current search
-    // and first - find responded oness and handle
+    // and first - find responded ones and handle
     // responses from them, second - find next
     // node to send search packet to.
 
