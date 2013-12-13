@@ -565,6 +565,8 @@ kad_search_start(
 
     query_count = kse->type == SEARCH_NODE?1:(ALPHA_QUERY < kn_cnt?ALPHA_QUERY:kn_cnt);
 
+    LOG_DEBUG("query_count: %d", query_count);
+
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(kse->nodes_in_use, e, nle);
 
       if (!query_count--) break;

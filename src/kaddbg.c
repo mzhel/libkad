@@ -457,3 +457,37 @@ kaddbg_print_qpkt(
 
   return result;
 }
+
+bool
+kaddbg_print_packet_header(
+                           uint8_t* pkt,
+                           uint32_t pkt_len,
+                           char* desc
+                          )
+{
+  bool result = false;
+  char* proto_str = NULL;
+  char* opcode_str = NULL;
+
+  do {
+
+    if (!pkt || !pkt_len) break;
+
+    if (pkt_len < 2) break;
+
+    kaddbg_get_proto_string(pkt[0], &proto_str);
+
+    kaddbg_get_opcode_string(pkt[1], &opcode_str);
+
+    LOG_DEBUG(desc);
+
+    LOG_DEBUG("proto: %s (0x%.2x)", proto_str, pkt[0]);
+
+    LOG_DEBUG("opcode: %s (0x%.2x)", opcode_str, pkt[1]);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}

@@ -5,6 +5,7 @@ bool
 kad_session_init(
                  uint16_t tcp_port,
                  uint16_t udp_port,
+                 char* nodes_file_path,
                  KAD_SESSION** ks_out
                  );
 
@@ -12,6 +13,12 @@ bool
 kad_session_uninit(
                    KAD_SESSION* ks
                    );
+
+bool
+kad_session_set_id(
+                   KAD_SESSION* ks,
+                   UINT128* id
+                  );
 
 bool
 kad_session_update(

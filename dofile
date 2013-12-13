@@ -68,6 +68,7 @@ TARGETNAME=libkad.a
 TARGETDIR=./bin/
 [Deployer]
 ./bin/libkad.a=../kad/lib/libkad.a
+./src/libkad.h=../kad/src/libkad/libkad.h
 [Cleaner]
 DIRS=./;./obj/;./bin/
 EXTS=*.o;*.dat;*.a

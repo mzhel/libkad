@@ -1,3 +1,4 @@
+#undef CONFIG_VERBOSE
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>
@@ -423,7 +424,7 @@ kbucket_get_closest_to(
 
       if (nle) {
 
-        ((KAD_NODE*)nle->node)->in_use--;
+        if (protect_picked_nodes) ((KAD_NODE*)nle->node)->in_use--;
 
         mem_free(nle);
 

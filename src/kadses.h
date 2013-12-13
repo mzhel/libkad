@@ -23,6 +23,7 @@ typedef struct _kad_session_timers {
 } KAD_SESSION_TIMERS;
 
 typedef struct _kad_session {
+  uint32_t version;
   UINT128 kad_id;
   uint8_t user_hash[16];
   uint32_t udp_key;
@@ -44,6 +45,11 @@ uint32_t
 kadses_get_pub_ip(
                   KAD_SESSION* ks
                  );
+
+uint16_t
+kadses_get_udp_port(
+                    KAD_SESSION* ks
+                   );
 
 bool
 kadses_create_queue_udp_pkt(

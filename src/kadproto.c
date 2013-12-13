@@ -331,9 +331,19 @@ kadproto_kademlia2_req(
 
     uint128_from_buffer(&self_id, pkt_data + 1 + sizeof(UINT128), pkt_data_len - 1 - sizeof(UINT128), false);
 
+    LOG_DEBUG("Nodes in request: %d", kn_cnt);
+
+    LOG_DEBUG_UINT128("kad_id: ", ((UINT128*)&ks->kad_id));
+
+    LOG_DEBUG_UINT128("received target_id: ", ((UINT128*)&trgt));
+
+    LOG_DEBUG_UINT128("received self_id: ", ((UINT128*)&self_id));
+
     uint128_xor(&ks->kad_id, &trgt, &dst);
 
-    if (0 == uint128_compare(&ks->kad_id, &self_id)){
+    LOG_DEBUG_UINT128("distance to target: ", ((UINT128*)&dst));
+
+    if (0 != uint128_compare(&ks->kad_id, &self_id)){
 
       LOG_WARN("Node id in request is not ours so response won't be send.");
 
@@ -351,6 +361,8 @@ kadproto_kademlia2_req(
 
     list_entries_count(res_lst, &kn_closest_cnt);
 
+    LOG_DEBUG("Closest nodes found: %d", kn_closest_cnt);
+
     // result list is a list of NODE_LIST_ENTRY entries.
     
     if (!kadpkt_create_search_response(&trgt, res_lst, &resp_pkt, &resp_pkt_len)){
@@ -363,7 +375,7 @@ kadproto_kademlia2_req(
 
     if (!kadqpkt_create_udp(ip4_no, port_no, NULL, sender_key, resp_pkt, resp_pkt_len, &qp)){
 
-      LOG_ERROR("Failed to create bootstrap response packet.");
+      LOG_ERROR("Failed to create search response packet.");
 
       break;
 

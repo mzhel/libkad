@@ -25,6 +25,22 @@ kadses_get_pub_ip(
   return result;
 }
 
+uint16_t
+kadses_get_udp_port(
+                    KAD_SESSION* ks
+                   )
+{
+  uint16_t result = 0;
+
+  do {
+
+    result = ks->udp_port;
+
+  } while (false);
+
+  return result;
+}
+
 bool
 kadses_create_queue_udp_pkt(
                             KAD_SESSION* ks,

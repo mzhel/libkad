@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>
+#undef CONFIG_VERBOSE
 #include <arpa/inet.h>
 #include <time.h>
 #include <memory.h>

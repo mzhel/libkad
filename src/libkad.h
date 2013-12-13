@@ -7,6 +7,7 @@ bool
 kad_session_init(
                  uint16_t tcp_port,
                  uint16_t udp_port,
+                 char* nodes_file_path,
                  KAD_SESSION** ks_out
                  );
 

@@ -1,3 +1,4 @@
+#undef CONFIG_VERBOSE
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>

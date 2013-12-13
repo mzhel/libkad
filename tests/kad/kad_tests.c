@@ -45,7 +45,7 @@ test_kad_timer(void** state)
   void* pkt;
   uint32_t pkt_len;
 
-  assert_true(kad_session_init(3001, 3002, &ks));
+  assert_true(kad_session_init(3001, 3002, "nodes.dat", &ks));
 
   kad_timer(ks);
 
@@ -73,9 +73,9 @@ void test_kad_packets(void** state)
   KAD_SESSION* ks1;
   KAD_SESSION* ks2;
 
-  assert_true(kad_session_init(3001, 3002, &ks1));
+  assert_true(kad_session_init(3001, 3002, "nodes.dat", &ks1));
 
-  assert_true(kad_session_init(3003, 3004, &ks2));
+  assert_true(kad_session_init(3003, 3004, "nodes.dat", &ks2));
 
   kad_session_uninit(ks1);
 

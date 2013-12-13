@@ -1,5 +1,7 @@
+[Alias]
+TEST_NAME=kad_tests
 [CLangCompiler]
-SOURCES=kad_tests.c \
+SOURCES=$TEST_NAME$.c \
         ../../src/comprs.c \
         ../../src/cipher.c \
         ../../src/kad.c \
@@ -63,7 +65,7 @@ DEFINE=EXIT_TIMER
 Daemon:
 DEFINE=RUN_AS_DAEMON
 [CLangLinker]
-TARGETNAME=kad_tests
+TARGETNAME=$TEST_NAME$
 TARGETDIR=../../bin/
 LIBS= cgraph cdt
 Shared:

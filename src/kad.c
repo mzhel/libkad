@@ -202,6 +202,7 @@ bool
 kad_session_init(
                  uint16_t tcp_port,
                  uint16_t udp_port,
+                 char* nodes_file_path,
                  KAD_SESSION** ks_out
                  )
 {
@@ -231,6 +232,8 @@ kad_session_init(
 
     }
 
+    ks->version = KADEMLIA_VERSION;
+
     random_init();
 
     he = gethostbyname("localhost");
@@ -242,6 +245,8 @@ kad_session_init(
     kad_fw_set_status_udp(&ks->fw, true);
 
     uint128_generate(&ks->kad_id);
+
+    LOG_DEBUG_UINT128("kad_id: ", ((UINT128*)&ks->kad_id));
 
     for (uint32_t i = 0; i < sizeof(ks->user_hash); i++){
 
@@ -255,9 +260,15 @@ kad_session_init(
 
     kadhlp_gen_udp_key(&ks->udp_key);
 
+    LOG_DEBUG("udp_key: %.8x", ks->udp_key);
+
     ks->udp_port = udp_port;
 
     ks->tcp_port = tcp_port;
+
+    LOG_DEBUG("udp_port = %d", udp_port);
+
+    LOG_DEBUG("tcp_port = %d", tcp_port);
 
     uint128_init(&zone_idx, 0);
 
@@ -279,7 +290,7 @@ kad_session_init(
 
     queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_out_udp);
 
-    kadhlp_add_nodes_from_file(ks, "nodes.dat");
+    if (nodes_file_path) kadhlp_add_nodes_from_file(ks, nodes_file_path);
   
     *ks_out = ks;
 
@@ -314,6 +325,27 @@ kad_session_uninit(
     kad_fw_destroy(&ks->fw);
 
     mem_free(ks);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kad_session_set_id(
+                   KAD_SESSION* ks,
+                   UINT128* id
+                  )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks || !id) break;
+
+    uint128_copy(id, &ks->kad_id);
 
     result = true;
 
@@ -957,9 +989,9 @@ kad_deq_and_handle_control_packet(
 
     }
 
-    KADDBG_PRINT_QPKT("received control packet:", qpkt, true);
+    KADDBG_PRINT_PACKET_HEADER(dec_pkt, dec_pkt_len, "received packet header: ");
 
-    // Here was firewall check start, probably need to stick it somwhere else.
+    // Here was firewall check start, probably need to stick it somewhere else.
     
     kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &calc_verify_key);
     

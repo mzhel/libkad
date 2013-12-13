@@ -14,17 +14,28 @@ kaddbg_print_qpkt(
                   bool ctrl
                   );
 
+bool
+kaddbg_print_packet_header(
+                           uint8_t* pkt,
+                           uint32_t pkt_len,
+                           char* desc
+                           );
+
 #ifdef CONFIG_VERBOSE
 
-#define KADDBG_PRINT_KN kaddbg_print_kn
+#define KADDBG_PRINT_KN(desc, kn) kaddbg_print_kn(desc, kn)
 
-#define KADDBG_PRINT_QPKT kaddbg_print_qpkt
+#define KADDBG_PRINT_QPKT(desc, qpkt, ctrl) kaddbg_print_qpkt(desc, qpkt, ctrl)
+
+#define KADDBG_PRINT_PACKET_HEADER(pkt, pkt_len, desc) kaddbg_print_packet_header(pkt, pkt_len, desc)
 
 #else
 
 #define KADDBG_PRINT_KN 
 
 #define KADDBG_PRINT_QPKT
+
+#define KADDBG_PRINT_PACKET_HEADER
 
 #endif
 
