@@ -48,4 +48,11 @@ kad_deq_and_handle_control_packet(
                                   KAD_SESSION* ks
                                   );
 
+bool
+kad_bootstrap_from_node(
+                        KAD_SESSION* ks,
+                        char* node_addr,
+                        uint16_t node_port
+                        );
+
 #endif //_LIBKAD_H_
