@@ -188,7 +188,7 @@ kadhlp_send_bootstrap_pkt(
 
     if (!ks) break;
 
-    if (kadpkt_create_bootstrap(&pkt, &pkt_len)){
+    if (!kadpkt_create_bootstrap(&pkt, &pkt_len)){
 
       LOG_ERROR("Failed to create bootstrap packet.");
 
