@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <memory.h>
 #include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <uint128.h>
 #include <list.h>
 #include <queue.h>
@@ -218,7 +221,9 @@ kad_session_init(
 
     LOG_LEVEL_DEBUG;
 
-    LOG_OUTPUT_CONSOLE;
+    LOG_FILE_NAME("libkad.log");
+
+    LOG_OUTPUT_CONSOLE_AND_FILE;
     
     if (!ks_out) break;
 
@@ -393,7 +398,7 @@ kad_session_update(
       // [IMPLEMENT] kad_fw_next_udp_check_request()
 
     }
-
+/*
     ACTIVE_ZONES_LOCK(ks);
 
     zones_locked = true;
@@ -435,7 +440,7 @@ kad_session_update(
     }
 
     ACTIVE_ZONES_UNLOCK(ks);
-
+*/
     zones_locked = false;
 
     // Jumpstart stalled searches.
@@ -462,8 +467,6 @@ kad_timer(KAD_SESSION* ks)
   uint32_t now = ticks_now_ms();
 
   do {
-
-    LOG_DEBUG("kad_timer");
 
     kad_session_update(ks, now);
 
@@ -1020,6 +1023,49 @@ kad_deq_and_handle_control_packet(
   }
 
   if (qpkt) kadqpkt_destroy(qpkt);
+
+  return result;
+}
+
+bool
+kad_bootstrap_from_node(
+                        KAD_SESSION* ks,
+                        char* node_addr,
+                        uint16_t node_port
+                        )
+{
+  bool result = false;
+  uint32_t ip4_no = 0;
+  uint16_t port_no = 0;
+  struct in_addr sin;
+
+  do {
+
+    if (!ks || !node_addr || !node_port) break;
+
+    memset(&sin, 0, sizeof(sin));
+
+    if (!inet_aton(node_addr, &sin)){
+
+      LOG_ERROR("Failed to convert %s into binary form.", node_addr);
+
+      break;
+      
+    }
+
+    port_no = htons(node_port);
+
+    ip4_no = sin.s_addr;
+
+    if (!kadhlp_send_bootstrap_pkt(ks, ip4_no, port_no)){
+
+      LOG_ERROR("Failed to send bootstrap packet to %s:%d", node_addr, node_port);
+
+    }
+
+    result = true;
+
+  } while (false);
 
   return result;
 }
