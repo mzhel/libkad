@@ -242,7 +242,7 @@ kadhlp_send_bs_req_pkt_to_rand_node(
 
     }
 
-    if (kadpkt_create_bootstrap(&pkt, &pkt_len)){
+    if (!kadpkt_create_bootstrap(&pkt, &pkt_len)){
 
       LOG_ERROR("Failed to create bootstrap packet.");
 
