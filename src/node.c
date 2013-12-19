@@ -50,7 +50,9 @@ node_create(
 {
   uint8_t result = 0;
   KAD_NODE* kn;
+#ifdef CONFIG_VERBOSE
   struct in_addr ia = {0};
+#endif
   uint32_t now;
 
   do {
@@ -61,7 +63,9 @@ node_create(
 
     LOG_DEBUG_UINT128("id:", id);
 
+#ifdef CONFIG_VERBOSE
     ia.s_addr = ip4_no; 
+#endif
 
     LOG_DEBUG("ip %s, tcp_port %.4d, udp_port %.4d, version %.2d", inet_ntoa(ia), ntohs(tcp_port_no), ntohs(udp_port_no), version);
 
@@ -89,13 +93,17 @@ node_create(
 
     uint128_copy(dist, &kn->dist);
 
-    kn->type = 3;
+    kn->status = NODE_STATUS_NEW;
 
     now = ticks_now_ms();
 
-    kn->last_type_set = kn->created = now;
+    kn->created = now;
 
-    kn->expires = kn->in_use = 0;
+    kn->in_use = 0;
+
+    kn->next_check_time = now + SEC2MS(5);
+
+    kn->packet_timeout = 0;
 
     kn->version = version;
 
@@ -107,7 +115,11 @@ node_create(
 
     node_set_udp_key_with_ip(kn, udp_key, self_ip4_no);
 
-    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
+#ifdef CONFIG_VERBOSE
+
+    strcpy(kn->ip4_str, inet_ntoa(ia));
+
+#endif
 
     // Here should be node lock initializer
 
@@ -144,44 +156,6 @@ node_destroy(
 
 }
 
-bool
-node_update_expired(
-                    KAD_NODE* kn
-                   )
-{
-  bool result = false;
-  uint32_t now;
-  struct in_addr ia = {0};
-
-  do {
-
-    if (!kn) break;
-
-    now = ticks_now_ms();
-
-    if (now - kn->last_type_set < SEC2MS(10) || kn->type == 4){
-      
-      result = true;
-
-      break;
-
-    }
-
-    kn->last_type_set = now;
-
-    kn->expires = now + MIN2MS(2);
-
-    kn->type++;
-
-    ia.s_addr = kn->ip4_no;
-
-    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
-
-  } while (false);
-
-  return result;
-}
-
 uint32_t
 node_get_udp_key_by_ip(
                        KAD_NODE* kn,
@@ -200,62 +174,50 @@ node_get_udp_key_by_ip(
 
 }
 
-uint8_t
-node_set_alive(
-               KAD_NODE* kn
-              )
+char*
+node_status_str(
+                KAD_NODE* kn
+               )
 {
-  uint8_t result = 0;
-  uint32_t now = ticks_now_ms();
-  uint32_t hrs = 0;
-  struct in_addr ia;
+  char* result = "UNDEFINED";
 
   do {
 
-    if (!kn) break;
+    switch(kn->status){
 
-    // Check time passed since  node creation.
+      case NODE_STATUS_NEW:
 
-    hrs = (now - kn->created) / HR2MS(1);
+        result = "NODE_STATUS_NEW";
 
-    switch (hrs){
+      break;
 
-      case 0:
+      case NODE_STATUS_HELLO_REQ_SENT:
 
-        kn->type = 2;
+        result = "NODE_STATUS_HELLO_REQ_SENT";
 
-        // Expiration time 1 hour.
+      break;
 
-        kn->expires = now + HR2MS(1);
+      case NODE_STATUS_HELLO_RES_RECEIVED:
 
-        break;
+        result = "NODE_STATUS_HELLO_RES_RECEIVED";
 
-      case 1:
+      break;
 
-        kn->type = 1;
+      case NODE_STATUS_PING_SENT:
 
-        // Expiration time 1,5 hours. 
+        result = "NODE_STATUS_PING_SENT";
 
-        kn->expires = now + MIN2MS(90);
+      break;
 
-        break;
+      case NODE_STATUS_PONG_RECEIVED:
 
-      default:
+        result = "NODE_STATUS_PONG_RECEIVED";
 
-        kn->type = 0;
-
-        // Expiration time - 2 hours.
-
-        kn->expires = now + HR2MS(2);
+      break;
 
     }
-
-    ia.s_addr = kn->ip4_no;
-
-    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
 
   } while (false);
 
   return result;
 }
-

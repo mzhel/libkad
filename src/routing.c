@@ -1,4 +1,3 @@
-#undef CONFIG_VERBOSE
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>
@@ -291,6 +290,8 @@ routing_add_node(
 
           // Nodes keys do not match.
           
+          LOG_ERROR("Udp keys do not match, old = %.8x, new = %.8x", check_udp_key, node_get_udp_key_by_ip(kn, self_pub_ip4_no));       
+
           break;
 
         }
@@ -318,11 +319,13 @@ routing_add_node(
 
         if (kn->hello_received) found_kn->hello_received = true;
 
+        found_kn->status = kn->status;
+
+        found_kn->next_check_time = kn->next_check_time;
+
         node_set_udp_key_with_ip(found_kn, kn->udp_key, self_pub_ip4_no);
 
         if (!found_kn->ip_verified) found_kn->ip_verified = kn->ip_verified;
-
-        kbucket_set_node_alive(rz->kb, found_kn);
 
         if (existing_updated_out) *existing_updated_out = true;
 

@@ -32,6 +32,8 @@ DIRS=./;./obj/
 EXTS=*.o;*.dat
 
 Build >> [CLangCompiler,CLangLinker]
+Rebuild >> [Cleaner,CLangCompiler,CLangLinker]
 Clean >> [Cleaner]
 
 default == [Build Debug Verbose]
+rb == [Rebuild Debug Verbose]

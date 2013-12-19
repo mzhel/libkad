@@ -39,6 +39,12 @@ kadhlp_send_bootstrap_pkt(
                           );
 
 bool
+kadhlp_send_hello_req_pkt_to_node(
+                                 KAD_SESSION* ks,
+                                 KAD_NODE* kn
+                                 );
+
+bool
 kadhlp_calc_udp_verify_key(
                            uint32_t udp_key,
                            uint32_t ip4_no,

@@ -93,12 +93,6 @@ kbucket_get_random_node(
                        );
 
 bool
-kbucket_set_node_alive(
-                       KBUCKET* kb,
-                       KAD_NODE* kn
-                       );
-
-bool
 kbucket_get_nodes(
                   KBUCKET* kb,
                   LIST** lst_out

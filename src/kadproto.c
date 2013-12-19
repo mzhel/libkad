@@ -17,6 +17,7 @@
 #include <kadproto.h>
 #include <kadqpkt.h>
 #include <packet.h>
+#include <ticks.h>
 #include <tag.h>
 #include <mem.h>
 
@@ -658,10 +659,11 @@ kadproto_kademlia2_pong(
 {
   bool result = false;
   uint16_t ext_port = 0;
+  KAD_NODE* kn = NULL;
 
   do {
 
-    kad_fw_set_extrn_port(&ks->fw,ip4_no, *(uint16_t*)pkt_data);
+    kad_fw_set_extrn_port(&ks->fw, ip4_no, *(uint16_t*)pkt_data);
 
     if (kad_fw_extrn_port_valid(&ks->fw)){
 
@@ -670,6 +672,16 @@ kadproto_kademlia2_pong(
       LOG_DEBUG("external port: %d", ext_port);
 
       // [IMPLEMENT] callback about external port resolving.
+
+    }
+
+    if (routing_get_node_by_ip_port(ks->root_zone, ip4_no, port_no, KAD_NODE_UDP_PORT, &kn, true) && kn->status == NODE_STATUS_PING_SENT){
+
+      kn->status = NODE_STATUS_PONG_RECEIVED;
+
+      kn->packet_timeout = 0;
+
+      kn->next_check_time = ticks_now_ms() + MIN2MS(1);
 
     }
 
@@ -861,6 +873,12 @@ kadproto_kademlia2_hello_req(
 
       kn->hello_received = true;
 
+      kn->status = NODE_STATUS_HELLO_RES_RECEIVED;
+
+      kn->packet_timeout = 0;
+
+      kn->next_check_time = ticks_now_ms() + MIN2MS(5);
+
       if (!routing_add_node(&ks->active_zones, ks->root_zone, kn, kadses_get_pub_ip(ks), true, &kn_updated, true)){
 
         LOG_ERROR("Failed to ad node to routing zone.");
@@ -954,17 +972,17 @@ kadproto_kademlia2_hello_res(
 
     udp_port = ntohs(port_no);
 
-    if (kadpkt_parse_hello(
-                           pkt_data,
-                           pkt_data_len,
-                           &kn_id,
-                           &tcp_port,
-                           &int_udp_port,
-                           &ver,
-                           &udp_fw,
-                           &tcp_fw,
-                           &ack_needed
-                          )
+    if (!kadpkt_parse_hello(
+                            pkt_data,
+                            pkt_data_len,
+                            &kn_id,
+                            &tcp_port,
+                            &int_udp_port,
+                            &ver,
+                            &udp_fw,
+                            &tcp_fw,
+                            &ack_needed
+                           )
     ){
 
       LOG_ERROR("Failed to parse hello packet.");
@@ -976,6 +994,8 @@ kadproto_kademlia2_hello_res(
     if (int_udp_port) udp_port = int_udp_port;
 
     // [TODO] fetch node id requests
+    //
+    // [IMPLEMENT] firewalled nodes should't be added to routing zone.
     
     if (!udp_fw){
 
@@ -1002,6 +1022,12 @@ kadproto_kademlia2_hello_res(
       }
 
       kn->hello_received = true;
+
+      kn->status = NODE_STATUS_HELLO_RES_RECEIVED;
+
+      kn->packet_timeout = 0;
+
+      kn->next_check_time = ticks_now_ms() + MIN2MS(5);
 
       if (!routing_add_node(
                             &ks->active_zones, 

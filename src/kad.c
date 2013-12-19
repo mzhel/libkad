@@ -75,7 +75,6 @@ kad_zone_update_bucket(
   KAD_NODE* kn = NULL;
   void* pkt = NULL;
   uint32_t pkt_len = 0;
-  bool pkt_queued = false;
   struct in_addr ia;
 
   do {
@@ -96,18 +95,11 @@ kad_zone_update_bucket(
 
       kn = kb->nodes[i];
 
-      if (!kn->expires){
-
-        // If expire time is not set -this is new node,
-        // set expire time to now.
-
-        kn->expires = now;
-
-      } else if (kn->type == 4 && kn->expires < now){
-
-        // node expire time is set and it is expired.
+      if ((kn->status & NODE_STATUS_WAIT_MASK) && kn->packet_timeout < now){
 
         if (!kn->in_use){
+
+          LOG_DEBUG("Removing node: %s:%d with status %s, packet timeout.", kn->ip4_str, ntohs(kn->udp_port_no), node_status_str(kn));
 
           if (!kbucket_remove_node_by_idx(kb, i, &rmvd_kn)){
 
@@ -116,10 +108,6 @@ kad_zone_update_bucket(
             break;
 
           }
-
-          ia.s_addr = rmvd_kn->ip4_no;
-
-          LOG_DEBUG("node/type: %s/%d - expired.", inet_itoa(ia), kn->type);
 
           kn_cnt--;
 
@@ -135,82 +123,43 @@ kad_zone_update_bucket(
 
     if (!kn) break;
 
-    if (kn->expires >= now || kn->type == 4){
+    if (kn->next_check_time >= now){
 
       kbucket_push_node_up(kb, kn);
 
     } else {
 
-      // increase node type and expire time.
+      switch (kn->status){
 
-      node_update_expired(kn);
+        case NODE_STATUS_NEW:
 
-      if (!kadpkt_create_hello_req(
-                                   &ks->kad_id,
-                                   ks->tcp_port,
-                                   ks->udp_port,
-                                   kn->version,
-                                   node_get_udp_key_by_ip(kn, kadses_get_pub_ip(ks)),
-                                   &kn->id,
-                                   false,
-                                   ks->fw.firewalled,
-                                   ks->fw.udp_firewalled,
-                                   &pkt,
-                                   &pkt_len
-                                   )
-      ){
+          kadhlp_send_hello_req_pkt_to_node(ks, kn);
 
-        LOG_ERROR("Failed to create hello packet.");
+          kn->packet_timeout = now + SEC2MS(15);
+
+          kn->status = NODE_STATUS_HELLO_REQ_SENT;
+
+          LOG_DEBUG("NODE_STATUS_HELLO_REQ_SENT for %s:%d", kn->ip4_str, ntohs(kn->udp_port_no));
+
+        break;
+
+        case NODE_STATUS_HELLO_RES_RECEIVED:
+
+        case NODE_STATUS_PONG_RECEIVED:
+
+          kadhlp_send_ping_pkt_to_node(ks, kn);
+
+          kn->packet_timeout = now + SEC2MS(10);
+
+          kn->status = NODE_STATUS_PING_SENT;
+
+          LOG_DEBUG("NODE_STATUS_PING_SENT for %s:%d", kn->ip4_str, ntohs(kn->udp_port_no));
 
         break;
 
       }
 
-      if (kn->version >= 6){
-
-        if (!kadses_create_queue_udp_pkt(
-                                         ks,
-                                         kn->ip4_no,
-                                         kn->udp_port_no,
-                                         &kn->id,
-                                         node_get_udp_key_by_ip(kn, kadses_get_pub_ip(ks)),
-                                         pkt,
-                                         pkt_len
-                                        )
-        ){
-
-          LOG_ERROR("Failed to queue hello packet.");
-
-          break;
-
-        }
-
-      } else if (kn->version >= 2){
-
-        if (!kadses_create_queue_udp_pkt(
-                                         ks,
-                                         kn->ip4_no,
-                                         kn->udp_port_no,
-                                         NULL,
-                                         0,
-                                         pkt,
-                                         pkt_len
-                                        )
-        ){
-
-          LOG_ERROR("Failed to queue hello packet.");
-
-          break;
-
-        }
-
-      }
-
-      pkt_queued = true;
-
     }
-
-    if (pkt_queued && pkt) mem_free(pkt);
 
     result = true;
 
@@ -430,7 +379,7 @@ kad_session_update(
         rz->next_bucket_timer = now + MIN2MS(1);
 
       }
-
+/*
       if (now >= rz->next_lookup_timer){
 
         LOG_DEBUG("Random lookup.");
@@ -440,16 +389,18 @@ kad_session_update(
         rz->next_lookup_timer = now + HR2MS(1);
 
       }
-
+*/
     LIST_EACH_ENTRY_WITH_DATA_END(e);
+
+    // [IMPLEMENT] Empty zones consolidation.
 
     if (now >= ks->timers.nodes_count_check){
 
       if (routing_get_nodes_count(ks->root_zone, &kn_cnt, true) && kn_cnt < 200){
 
-        LOG_DEBUG("Bootstrap packet.");
+    //    LOG_DEBUG("Bootstrap packet.");
 
-        kadhlp_send_bs_req_pkt_to_rand_node(ks);
+    //    kadhlp_send_bs_req_pkt_to_rand_node(ks);
 
       }
 
@@ -1014,7 +965,7 @@ kad_deq_and_handle_control_packet(
 
     KADDBG_PRINT_PACKET_HEADER(dec_pkt, dec_pkt_len, "received packet header: ");
 
-    // Here was firewall check start, probably need to stick it somewhere else.
+    // [IMPLEMENT] Here was firewall check start, probably need to stick it somewhere else.
     
     kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &calc_verify_key);
     

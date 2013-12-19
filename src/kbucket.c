@@ -1,4 +1,3 @@
-#undef CONFIG_VERBOSE
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>
@@ -384,13 +383,17 @@ kbucket_get_closest_to(
 
   do {
 
+    // [IMPLEMENT] max_type is not used, probably need to implement it differently
+    // since all node reliability checking system was changed. For now nodes with
+    // verified ip selected regardless of max_type setting.
+
     if (!kb || !trgt_id || !lst_inout) break;
 
     for (uint32_t i = 0; i < kb->nodes_count; i++) {
 
       kn = kb->nodes[i];
 
-      if (kn->type <= max_type && kn->ip_verified) {
+      if (kn->ip_verified) {
 
         nle = (NODE_LIST_ENTRY*)mem_alloc(sizeof(NODE_LIST_ENTRY));
 
@@ -465,7 +468,7 @@ kbucket_get_random_node(
 
       kn = kb->nodes[i];
 
-      if (kn->type <= max_type && kn->version >= min_kad_ver){
+      if (kn->version >= min_kad_ver){
 
         found = true;
 
@@ -484,37 +487,6 @@ kbucket_get_random_node(
     result = true;
 
   } while (false);
-
-  return result;
-}
-
-bool
-kbucket_set_node_alive(
-                       KBUCKET* kb,
-                       KAD_NODE* kn
-                       )
-{
-  bool result = false;
-  KAD_NODE* kn2 = NULL;
-
-  do {
-
-    if (!kb || !kn) break;
-
-    kbucket_node_by_id(kb, &kn->id, &kn2);
-
-    if (kn == kn2){
-
-      node_set_alive(kn);
-
-      kbucket_push_node_up(kb, kn); 
-
-      result = true;
-
-    }
-
-  } while(false);
-
 
   return result;
 }

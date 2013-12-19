@@ -277,6 +277,90 @@ kadhlp_send_bs_req_pkt_to_rand_node(
 }
 
 bool
+kadhlp_send_hello_req_pkt_to_node(
+                                 KAD_SESSION* ks,
+                                 KAD_NODE* kn
+                                 )
+{
+  bool result = false;
+  void* pkt = NULL;
+  uint32_t pkt_len = 0;
+
+  do {
+
+    if (!ks || !kn) break;
+
+    if (!kadpkt_create_hello_req(
+                                 &ks->kad_id,
+                                 ks->tcp_port,
+                                 0, // [IMPLEMENT] here should be check use external udp port or not, for now used by default.
+                                 kn->version,
+                                 node_get_udp_key_by_ip(kn, kadses_get_pub_ip(ks)),
+                                 &kn->id,
+                                 false,
+                                 ks->fw.firewalled,
+                                 ks->fw.udp_firewalled,
+                                 &pkt,
+                                 &pkt_len
+                                 )
+    ){
+
+      LOG_ERROR("Failed to create hello packet.");
+
+      break;
+
+    }
+
+    if (kn->version >= 6){
+
+      if (!kadses_create_queue_udp_pkt(
+                                       ks,
+                                       kn->ip4_no,
+                                       kn->udp_port_no,
+                                       &kn->id,
+                                       node_get_udp_key_by_ip(kn, kadses_get_pub_ip(ks)),
+                                       pkt,
+                                       pkt_len
+                                       )
+      ){
+
+        LOG_ERROR("Failed to queue hello packet.");
+
+        break;
+
+      }
+
+    } else if (kn->version >= 2){
+
+      if (!kadses_create_queue_udp_pkt(
+                                       ks,
+                                       kn->ip4_no,
+                                       kn->udp_port_no,
+                                       NULL,
+                                       0,
+                                       pkt,
+                                       pkt_len
+                                       )
+      ){
+
+        LOG_ERROR("Failed to queue hello packet.");
+
+        break;
+
+      }
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  if (!result && pkt) mem_free(pkt);
+
+  return result;
+}
+
+bool
 kadhlp_calc_udp_verify_key(
                            uint32_t udp_key,
                            uint32_t ip4_no,
@@ -497,7 +581,7 @@ kadhlp_parse_nodes_dat(
 
       if (!node_create(
                        &id,
-                       kadses_get_pub_ip(ks),
+                       htonl(udp_key_ip4),
                        htonl(ip4_no),
                        htons(tcp_port),
                        htons(udp_port),

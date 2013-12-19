@@ -242,7 +242,7 @@ tag_calc_buf_size(
 
     } else {
 
-      size += sizeof(uint32_t) + // Name length
+      size += sizeof(uint16_t) + // Name length
               tag->name_len;    // Name data.
 
     }

@@ -54,9 +54,9 @@ kadpkt_create_hello(
                     uint32_t* raw_pkt_len_out
                     );
 
-#define kadpkt_create_hello_req(a, b, c, d, e, f, g, h, i, j, k) kadpkt_create_hello(a, b, c, d, KADEMLIA2_HELLO_REQ, e, f, g, h, i, j, k)
+#define kadpkt_create_hello_req(a, b, c, d, e, f, g, h, i, j, k) kadpkt_create_hello(a, b, c, KADEMLIA2_HELLO_REQ, d, e, f, g, h, i, j, k)
 
-#define kadpkt_create_hello_res(a, b, c, d, e, f, g, h, i, j, k) kadpkt_create_hello(a, b, c, d, KADEMLIA2_HELLO_RES, e, f, g, h, i, j, k)
+#define kadpkt_create_hello_res(a, b, c, d, e, f, g, h, i, j, k) kadpkt_create_hello(a, b, c, KADEMLIA2_HELLO_RES, d, e, f, g, h, i, j, k)
 
 bool
 kadpkt_create_hello_ack(

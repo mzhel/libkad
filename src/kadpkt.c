@@ -827,6 +827,7 @@ kadpkt_parse_hello(
 
     }
 
+    if (kn_id_out) uint128_copy(&kn_id, kn_id_out);
 
     if (tcp_port_out) *tcp_port_out = tcp_port;
 
