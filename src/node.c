@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <netinet/in.h>
-#undef CONFIG_VERBOSE
 #include <arpa/inet.h>
 #include <time.h>
 #include <memory.h>
@@ -108,6 +107,8 @@ node_create(
 
     node_set_udp_key_with_ip(kn, udp_key, self_ip4_no);
 
+    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
+
     // Here should be node lock initializer
 
     *kn_out = kn;
@@ -150,6 +151,7 @@ node_update_expired(
 {
   bool result = false;
   uint32_t now;
+  struct in_addr ia = {0};
 
   do {
 
@@ -171,6 +173,9 @@ node_update_expired(
 
     kn->type++;
 
+    ia.s_addr = kn->ip4_no;
+
+    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
 
   } while (false);
 
@@ -203,11 +208,11 @@ node_set_alive(
   uint8_t result = 0;
   uint32_t now = ticks_now_ms();
   uint32_t hrs = 0;
+  struct in_addr ia;
 
   do {
 
     if (!kn) break;
-
 
     // Check time passed since  node creation.
 
@@ -244,6 +249,10 @@ node_set_alive(
         kn->expires = now + HR2MS(2);
 
     }
+
+    ia.s_addr = kn->ip4_no;
+
+    LOG_DEBUG("node/type: %s - %d", inet_ntoa(ia), kn->type);
 
   } while (false);
 

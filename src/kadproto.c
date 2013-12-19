@@ -49,7 +49,7 @@ kadproto_kademlia2_bootstrap_req(
 
     if (kn_cnt){
 
-      LOG_WARN("No bootstrap contacts, answer packeet won't be send.");
+      LOG_WARN("No bootstrap contacts, answer packet won't be send.");
 
       break;
 
@@ -666,6 +666,8 @@ kadproto_kademlia2_pong(
     if (kad_fw_extrn_port_valid(&ks->fw)){
 
       kad_fw_get_extrn_port(&ks->fw, &ext_port);
+
+      LOG_DEBUG("external port: %d", ext_port);
 
       // [IMPLEMENT] callback about external port resolving.
 

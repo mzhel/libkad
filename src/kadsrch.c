@@ -1328,7 +1328,6 @@ kad_search_jump_start(
 
     }
 
-
     // Check if we had response within 3 seconds interval.
 
     if (kse->last_response + SEC2MS(3) > now){
@@ -1387,7 +1386,7 @@ kad_search_jump_start(
     
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(del_from_to_try, e, nle);
 
-      // Wee do not free entry because it is member
+      // We do not free entry because it is a member
       // of at least nodes_in_use list.
 
       list_remove_entry_by_data(&kse->nodes_to_try, nle, false);

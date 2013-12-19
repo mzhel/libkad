@@ -201,7 +201,7 @@ kbucket_node_by_ip_port(
 
     if (!found) break;
 
-    result = 1;
+    result = true;
 
   } while (false);
 

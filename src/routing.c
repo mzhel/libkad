@@ -221,7 +221,7 @@ routing_split_zone(
 
     if (error) break;
 
-    kbucket_destroy(rz->kb, true); // Destroy spliited bucket but keep nodes.
+    kbucket_destroy(rz->kb, true); // Destroy splited bucket but keep nodes.
 
     rz->kb = NULL;
 

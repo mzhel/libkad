@@ -76,6 +76,7 @@ kad_zone_update_bucket(
   void* pkt = NULL;
   uint32_t pkt_len = 0;
   bool pkt_queued = false;
+  struct in_addr ia;
 
   do {
 
@@ -85,11 +86,26 @@ kad_zone_update_bucket(
 
     kn_cnt = kb->nodes_count;
 
+    // Check all nodes for expiration,
+    // if node expire time is not set -
+    // set it to now. If node expiration time
+    // is lesser than now remove node from bucket
+    // and destroy it.
+
     for (uint32_t i = 0; i < kn_cnt; i++){
 
       kn = kb->nodes[i];
 
-      if (kn->expires && kn->expires < now){
+      if (!kn->expires){
+
+        // If expire time is not set -this is new node,
+        // set expire time to now.
+
+        kn->expires = now;
+
+      } else if (kn->type == 4 && kn->expires < now){
+
+        // node expire time is set and it is expired.
 
         if (!kn->in_use){
 
@@ -101,17 +117,17 @@ kad_zone_update_bucket(
 
           }
 
+          ia.s_addr = rmvd_kn->ip4_no;
+
+          LOG_DEBUG("node/type: %s/%d - expired.", inet_itoa(ia), kn->type);
+
           kn_cnt--;
 
           node_destroy(rmvd_kn);
           
         }
 
-        continue;
-
       }
-
-      if (!kn->expires) kn->expires = now;
 
     }
 
@@ -124,6 +140,8 @@ kad_zone_update_bucket(
       kbucket_push_node_up(kb, kn);
 
     } else {
+
+      // increase node type and expire time.
 
       node_update_expired(kn);
 
@@ -398,7 +416,7 @@ kad_session_update(
       // [IMPLEMENT] kad_fw_next_udp_check_request()
 
     }
-/*
+
     ACTIVE_ZONES_LOCK(ks);
 
     zones_locked = true;
@@ -427,27 +445,29 @@ kad_session_update(
 
     if (now >= ks->timers.nodes_count_check){
 
-      LOG_DEBUG("Bootstrap packet.");
-
       if (routing_get_nodes_count(ks->root_zone, &kn_cnt, true) && kn_cnt < 200){
+
+        LOG_DEBUG("Bootstrap packet.");
 
         kadhlp_send_bs_req_pkt_to_rand_node(ks);
 
       }
+
+      LOG_DEBUG("Nodes count: %d", kn_cnt);
 
       ks->timers.nodes_count_check = now + SEC2MS(10);
 
     }
 
     ACTIVE_ZONES_UNLOCK(ks);
-*/
+
     zones_locked = false;
 
     // Jumpstart stalled searches.
   
     if (now >= ks->timers.search_jumpstart){
 
-      LOG_DEBUG("Jump-start searches.");
+      // LOG_DEBUG("Jump-start searches.");
 
       kad_search_jumpstart_all(ks, &ks->searches);
 
