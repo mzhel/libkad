@@ -394,7 +394,7 @@ kadproto_kademlia2_req(
 
     // [IMPLEMENT] unlock nodes list.
     
-    list_destroy(res_lst, false);
+    list_destroy(res_lst, true);
 
   }
 
@@ -954,8 +954,8 @@ kadproto_kademlia2_hello_res(
   bool result = false;
   UINT128 kn_id;
   UINT128 dist;
-  uint16_t tcp_port;
-  uint16_t udp_port;
+  uint16_t tcp_port = 0;
+  uint16_t udp_port = 0;
   uint16_t int_udp_port = 0;
   uint8_t ver = 0;
   uint8_t tag_cnt;

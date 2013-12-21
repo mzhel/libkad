@@ -97,16 +97,16 @@ str_utf8_to_unicode(
 
 uint32_t
 str_wide_len(
-             char* str
+             wchar_t* str
             )
 {
   uint32_t result = 0;
 
-  while (*(uint16_t*)str != 0) {
+  while (*str != 0) {
 
     result++;
 
-    str += 2;
+    str++;
 
   }
 
@@ -127,9 +127,9 @@ str_wide_cmp(
     
     if (!str1 || !str2) break;
 
-    len1 = str_wide_len((char*)str1);
+    len1 = str_wide_len(str1);
 
-    len2 = str_wide_len((char*)str2);
+    len2 = str_wide_len(str2);
 
     if (len1 > len2) {
 

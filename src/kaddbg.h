@@ -31,11 +31,11 @@ kaddbg_print_packet_header(
 
 #else
 
-#define KADDBG_PRINT_KN 
+#define KADDBG_PRINT_KN(desc, kn)
 
-#define KADDBG_PRINT_QPKT
+#define KADDBG_PRINT_QPKT(desc, qpkt, ctrl)
 
-#define KADDBG_PRINT_PACKET_HEADER
+#define KADDBG_PRINT_PACKET_HEADER(pkt, pkt_len, desc)
 
 #endif
 

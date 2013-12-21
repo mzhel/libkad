@@ -339,7 +339,7 @@ kad_session_update(
   uint32_t kn_cnt = 0;
 
   do {
-
+/*
     if (ks->timers.self_lookup <= now){
 
       LOG_DEBUG("Self-lookup.");
@@ -349,7 +349,7 @@ kad_session_update(
       ks->timers.self_lookup = now + HR2MS(4);
 
     }
-
+*/
     if (ks->timers.udp_port_lookup <= now && kad_fw_udp_check_running(&ks->fw) && !kad_fw_extrn_port_valid(&ks->fw)){
 
       LOG_DEBUG("Ping packet to random node.");
@@ -822,7 +822,7 @@ kad_get_control_packet_to_send(
 
     *pkt_len_out = enc_pkt_len;
 
-    kadqpkt_destroy(qpkt);
+    kadqpkt_destroy(qpkt, true);
 
     result = true;
 
@@ -963,7 +963,7 @@ kad_deq_and_handle_control_packet(
 
     }
 
-    KADDBG_PRINT_PACKET_HEADER(dec_pkt, dec_pkt_len, "received packet header: ");
+    KADDBG_PRINT_PACKET_HEADER(unk_pkt, unk_pkt_len, "received packet header: ");
 
     // [IMPLEMENT] Here was firewall check start, probably need to stick it somewhere else.
     
@@ -993,7 +993,7 @@ kad_deq_and_handle_control_packet(
 
   }
 
-  if (qpkt) kadqpkt_destroy(qpkt);
+  if (qpkt) kadqpkt_destroy(qpkt, true);
 
   return result;
 }

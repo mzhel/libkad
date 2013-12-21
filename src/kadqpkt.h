@@ -23,7 +23,8 @@ kadqpkt_alloc(
 
 bool
 kadqpkt_destroy(
-                KAD_QUEUED_PACKET* qp
+                KAD_QUEUED_PACKET* qp,
+                bool free_data
                );
 
 bool

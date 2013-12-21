@@ -19,7 +19,7 @@ str_utf8_to_unicode(
 
 uint32_t
 str_wide_len(
-             char* str
+             wchar_t* str
             );
 
 uint8_t

@@ -148,6 +148,10 @@ kadpkt_create_search(
 
   } while (false);
 
+  if (kp) pkt_destroy(kp);
+
+  if (!result && raw_pkt) mem_free(raw_pkt);
+
   return result;
 }
 
@@ -207,6 +211,9 @@ kadpkt_create_ping(
 
   } while (false);
 
+  if (kp) pkt_destroy(kp);
+
+  if (!result && raw_pkt) mem_free(raw_pkt);
 
   return result;
 }
@@ -636,9 +643,13 @@ kadpkt_create_hello(
 
   if (src_uport_tag) tag_destroy(src_uport_tag);
 
+  if (opts_tag) tag_destroy(opts_tag);
+
   if (pkt_data) mem_free(pkt_data);
 
   if (kp) pkt_destroy(kp);
+
+  if (!result && raw_pkt) mem_free(raw_pkt);
 
   return result;
 }

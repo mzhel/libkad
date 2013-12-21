@@ -347,7 +347,13 @@ kadhlp_send_hello_req_pkt_to_node(
 
         break;
 
-      }
+      } 
+
+    } else {
+
+      // Version mismatch.
+
+      mem_free(pkt);
 
     }
 
@@ -445,7 +451,7 @@ kadhlp_destroy_qpkt_queue(
 
       if (!qpkt) break;
 
-      kadqpkt_destroy(qpkt);
+      kadqpkt_destroy(qpkt, true);
 
     } while (true);
 
@@ -643,6 +649,8 @@ kadhlp_add_nodes_from_file(
     result = true;
 
   } while (false);
+
+  if (kn) list_destroy(kn_lst, false);
 
   return result;
 }

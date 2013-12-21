@@ -40,7 +40,7 @@ tag_var_int_create(
 
     if ((!name_id && !name) || !tag_out) break;
 
-    if (!name_id) name_len = str_wide_len((char*)name);
+    if (!name_id) name_len = str_wide_len(name);
 
     tag = (TAG*) mem_alloc(sizeof(TAG) + (name_len * 2));
 
@@ -124,7 +124,7 @@ tag_string_create(
 
     if (!name_id){
 
-      name_len = str_wide_len((char*)name);
+      name_len = str_wide_len(name);
 
     }
 

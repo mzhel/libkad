@@ -56,7 +56,8 @@ kadqpkt_alloc(
 
 bool
 kadqpkt_destroy(
-                KAD_QUEUED_PACKET* qp
+                KAD_QUEUED_PACKET* qp,
+                bool free_data
                )
 {
   bool result = false;
@@ -64,6 +65,8 @@ kadqpkt_destroy(
   do {
 
     if (!qp) break;
+
+    if (free_data) mem_free(qp->pkt);
 
     mem_free(qp);
 
@@ -116,7 +119,7 @@ kadqpkt_create_udp(
 
   } while (false);
 
-  if (!result && qp) kadqpkt_destroy(qp);
+  if (!result && qp) kadqpkt_destroy(qp, false);
 
   return result;
 }
