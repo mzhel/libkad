@@ -755,7 +755,6 @@ kadpkt_parse_hello(
   bool result = false;
   uint8_t* p = NULL;
   uint32_t rem_len = 0;
-  UINT128 dist;
   uint16_t tcp_port = 0;
   uint16_t udp_port = 0;
   uint8_t ver = 0;
@@ -766,11 +765,15 @@ kadpkt_parse_hello(
   TAG* tag = NULL;
   uint32_t tag_len = 0;
   wchar_t tag_name[128];
-  uint64_t int_val;
+  uint64_t int_val = 0;
   KAD_NODE* kn = NULL;
   UINT128 kn_id;
+  uint32_t hello_pkt_min_len = sizeof(UINT128) + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t);
+  bool error = false;
 
   do {
+
+    if (pkt_len < hello_pkt_min_len) break;
 
     p = pkt;
 
@@ -779,6 +782,8 @@ kadpkt_parse_hello(
     // Sender node id
 
     uint128_from_buffer(&kn_id, p, rem_len, false);
+
+    LOG_DEBUG("id: ", ((UINT128*)&kn_id));
 
     p += sizeof(UINT128);
 
@@ -792,11 +797,15 @@ kadpkt_parse_hello(
 
     rem_len -= sizeof(uint16_t);
 
+    LOG_DEBUG("tcp_port: %d", tcp_port);
+
     // Sender version
 
     ver = *p++;
 
     rem_len--;
+
+    LOG_DEBUG("version: %d", ver);
 
     // Tag count
     
@@ -804,21 +813,35 @@ kadpkt_parse_hello(
 
     rem_len--;
 
+    LOG_DEBUG("tag_cnt: %d", tag_cnt);
+
     while (tag_cnt--){
 
-      if (!tag_read(p, rem_len, false, &tag, &p, &tag_len)) continue;
+      if (!tag_read(p, rem_len, false, &tag, &p, &tag_len)){
+
+        error = true;
+
+        LOG_ERROR("Failed to read tag.");
+
+        break;
+
+      }
+
+      memset(tag_name, 0, sizeof(tag_name));
 
       tag_get_name(tag, tag_name, sizeof(tag_name));
 
-      if (str_wide_cmp(tag_name, TAG_SOURCEUPORT)){
+      if (0 == str_wide_cmp(tag_name, TAG_SOURCEUPORT)){
 
         if (tag_is_integer(tag) && tag_get_integer(tag, &int_val)){
 
           udp_port = (uint16_t)int_val;
 
+          LOG_DEBUG("TAG_SOURCEUPORT = %d", udp_port);
+
         }
 
-      } else if (str_wide_cmp(tag_name, TAG_KADMISCOPTIONS)){
+      } else if (0 == str_wide_cmp(tag_name, TAG_KADMISCOPTIONS)){
 
         if (tag_is_integer(tag) && tag_get_integer(tag, &int_val)){
 
@@ -827,6 +850,8 @@ kadpkt_parse_hello(
           tcp_fw = (int_val & 2) > 0;
 
           ack_needed = (ver >= 8) && ((int_val & 4) > 0);
+
+          LOG_DEBUG("TAG_KADMISCOPTIONS = %d", int_val);
 
         }
 
@@ -837,6 +862,8 @@ kadpkt_parse_hello(
       tag = NULL;
 
     }
+
+    if (error) break;
 
     if (kn_id_out) uint128_copy(&kn_id, kn_id_out);
 
@@ -851,7 +878,6 @@ kadpkt_parse_hello(
     if (tcp_fw_out) *tcp_fw_out = tcp_fw;
 
     if (ack_needed_out) *ack_needed_out = ack_needed;
-
 
     result = true;
 

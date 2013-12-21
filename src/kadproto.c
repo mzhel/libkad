@@ -958,7 +958,7 @@ kadproto_kademlia2_hello_res(
   uint16_t udp_port = 0;
   uint16_t int_udp_port = 0;
   uint8_t ver = 0;
-  uint8_t tag_cnt;
+  uint8_t tag_cnt = 0;
   bool udp_fw = false;
   bool tcp_fw = false;
   bool ack_needed = false;

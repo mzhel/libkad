@@ -820,6 +820,8 @@ kad_get_control_packet_to_send(
 
     }
 
+    if (!enc_pkt || !enc_pkt_len) break;
+
     LOG_DEBUG("enc_pkt_len = %.8x", enc_pkt_len);
 
     *ip4_no_out = qpkt->ip4_no;
@@ -830,11 +832,11 @@ kad_get_control_packet_to_send(
 
     *pkt_len_out = enc_pkt_len;
 
-    kadqpkt_destroy(qpkt, true);
-
     result = true;
 
   } while (false);
+
+  if (qpkt) kadqpkt_destroy(qpkt, true);
 
   return result;
 }
