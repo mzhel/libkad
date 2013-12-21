@@ -95,7 +95,7 @@ kad_zone_update_bucket(
 
       kn = kb->nodes[i];
 
-      if ((kn->status & NODE_STATUS_WAIT_MASK) && kn->packet_timeout < now){
+      if (kn->status == NODE_STATUS_TO_REMOVE || ((kn->status & NODE_STATUS_WAIT_MASK) && kn->packet_timeout < now)){
 
         if (!kn->in_use){
 
@@ -133,13 +133,21 @@ kad_zone_update_bucket(
 
         case NODE_STATUS_NEW:
 
-          kadhlp_send_hello_req_pkt_to_node(ks, kn);
+          if (kadhlp_send_hello_req_pkt_to_node(ks, kn)){
 
-          kn->packet_timeout = now + SEC2MS(15);
+            kn->packet_timeout = now + SEC2MS(15);
 
-          kn->status = NODE_STATUS_HELLO_REQ_SENT;
+            kn->status = NODE_STATUS_HELLO_REQ_SENT;
 
-          LOG_DEBUG("NODE_STATUS_HELLO_REQ_SENT for %s:%d", kn->ip4_str, ntohs(kn->udp_port_no));
+            LOG_DEBUG("NODE_STATUS_HELLO_REQ_SENT for %s:%d", kn->ip4_str, ntohs(kn->udp_port_no));
+
+          } else {
+
+            // Something happened and hello request was not sent.
+            
+            if (kn->version < 2) kn->status = NODE_STATUS_TO_REMOVE;
+
+          }
 
         break;
 

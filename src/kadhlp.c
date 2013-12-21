@@ -353,7 +353,7 @@ kadhlp_send_hello_req_pkt_to_node(
 
       // Version mismatch.
 
-      mem_free(pkt);
+      break;
 
     }
 
