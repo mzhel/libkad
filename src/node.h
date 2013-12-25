@@ -54,6 +54,12 @@ node_destroy(
              KAD_NODE* kn
             );
 
+bool
+node_copy(
+          KAD_NODE* kn_src,
+          KAD_NODE* kn_dst
+         );
+
 uint8_t
 node_set_udp_key_with_ip(
                          KAD_NODE* kn,

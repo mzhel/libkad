@@ -174,6 +174,29 @@ node_get_udp_key_by_ip(
 
 }
 
+bool
+node_copy(
+          KAD_NODE* kn_src,
+          KAD_NODE* kn_dst
+         )
+{
+  bool result = false;
+
+  do {
+
+    if (!kn_src || !kn_dst) break;
+
+    memcpy(kn_dst, kn_src, sizeof(KAD_NODE));
+
+    kn_dst->created = ticks_now_ms();
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
 char*
 node_status_str(
                 KAD_NODE* kn
