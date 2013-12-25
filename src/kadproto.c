@@ -633,7 +633,7 @@ kadproto_kademlia_ping(
 
       }
 
-      if (!kadses_create_queue_udp_pkt(ks, ip4_no, port_no, NULL, sender_key, &pkt, pkt_len)){
+      if (!kadses_create_queue_udp_pkt(ks, ip4_no, port_no, NULL, sender_key, pkt, pkt_len)){
 
         LOG_ERROR("Failed to queue pong packet.");
 
