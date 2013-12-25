@@ -22,7 +22,6 @@ typedef struct _kad_node {
   uint32_t status;
   uint32_t next_check_time;
   uint32_t packet_timeout;
-  uint32_t in_use;
   uint8_t version;
   bool check_kad2;
   bool ip_verified;

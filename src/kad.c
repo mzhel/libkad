@@ -97,24 +97,20 @@ kad_zone_update_bucket(
 
       if (kn->status == NODE_STATUS_TO_REMOVE || ((kn->status & NODE_STATUS_WAIT_MASK) && kn->packet_timeout < now)){
 
-        if (!kn->in_use){
+        LOG_DEBUG("Removing node: %s:%d with status %s, packet timeout.", kn->ip4_str, ntohs(kn->udp_port_no), node_status_str(kn));
 
-          LOG_DEBUG("Removing node: %s:%d with status %s, packet timeout.", kn->ip4_str, ntohs(kn->udp_port_no), node_status_str(kn));
+        if (!kbucket_remove_node_by_idx(kb, i, &rmvd_kn)){
 
-          if (!kbucket_remove_node_by_idx(kb, i, &rmvd_kn)){
+          LOG_ERROR("Failed to delete expired node.");
 
-            LOG_ERROR("Failed to delete expired node.");
+          break;
 
-            break;
-
-          }
-
-          kn_cnt--;
-
-          node_destroy(rmvd_kn);
-          
         }
 
+        kn_cnt--;
+
+        node_destroy(rmvd_kn);
+          
       }
 
     }

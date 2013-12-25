@@ -99,8 +99,6 @@ node_create(
 
     kn->created = now;
 
-    kn->in_use = 0;
-
     kn->next_check_time = now + SEC2MS(5);
 
     kn->packet_timeout = 0;
