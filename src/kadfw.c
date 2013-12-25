@@ -108,7 +108,7 @@ kad_fw_set_extrn_port(
 
     if (kfw->extrn_udp_port_valid) break;
 
-    if (list_entry_by_data(kfw->extrn_port_asked_ips, (void*)ip4_no, NULL)){
+    if (list_entry_by_data(kfw->extrn_port_asked_ips, (void*)(uint64_t)ip4_no, NULL)){
 
       // Already have answer from that ip.
       
@@ -116,7 +116,7 @@ kad_fw_set_extrn_port(
 
     }
 
-    list_add_entry(&kfw->extrn_port_asked_ips, (void*)ip4_no);
+    list_add_entry(&kfw->extrn_port_asked_ips, (void*)(uint64_t)ip4_no);
 
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(kfw->extrn_ports, e, port);
 
@@ -136,7 +136,7 @@ kad_fw_set_extrn_port(
 
     if (found) break;
 
-    list_add_entry(&kfw->extrn_ports, (void*)new_port);
+    list_add_entry(&kfw->extrn_ports, (void*)(uint64_t)new_port);
 
     result = true;
 
