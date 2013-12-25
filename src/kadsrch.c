@@ -1030,6 +1030,8 @@ kad_search_process_response(
 
       kse->answers++;
 
+      break;
+
     }
 
     // Find responded node in tried nodes list.
