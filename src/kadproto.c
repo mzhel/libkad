@@ -418,6 +418,7 @@ kadproto_kademlia2_res(
   uint8_t num_cnt = 0;
   bool fw_chk = false;
   KAD_NODE* kn = NULL;
+  KAD_NODE* kn_for_srch = NULL;
   UINT128 kn_id;
   uint32_t kn_ip4 = 0;
   uint16_t kn_udp_prt = 0;
@@ -426,6 +427,7 @@ kadproto_kademlia2_res(
   UINT128 dst_to_kn;
   bool updated = false;
   LIST* kn_from_resp = NULL;
+  bool added_to_zone = false;
 
   do {
 
@@ -461,7 +463,7 @@ kadproto_kademlia2_res(
     }
 
     // Add all nodes from response to routing tables
-    // on in case of firewall check to firewall
+    // or in case of firewall check to firewall
     // check list.
 
     for (uint32_t i = 0; i < num_cnt; i++){
@@ -469,6 +471,10 @@ kadproto_kademlia2_res(
       if (rem_len < sizeof(UINT128) + sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint8_t)) break;
 
       kn = NULL;
+
+      kn_for_srch = NULL;
+
+      added_to_zone = false;
 
       // Node id
 
@@ -555,17 +561,25 @@ kadproto_kademlia2_res(
         
         if (routing_add_node(&ks->active_zones, rz, kn, kadses_get_pub_ip(ks), false, &updated, true)){
 
-          LOG_WARN("Failed to add node to routing zone.");
-
-          node_destroy(kn);
+          added_to_zone = true;
 
         } else {
 
-          kn->in_use++;
-
-          list_add_entry(&kn_from_resp, (void*)kn);
+          LOG_WARN("Failed to add node to routing zone.");
 
         }
+
+        if (added_to_zone){
+
+          node_copy(kn, kn_for_srch); 
+
+        } else {
+
+          kn_for_srch = kn;
+
+        }
+
+        list_add_entry(&kn_from_resp, (void*)kn_for_srch);
 
       }
 
@@ -575,7 +589,7 @@ kadproto_kademlia2_res(
     
     kad_search_process_response(ks, &trgt, ip4_no, port_no, kn_from_resp, &ks->searches);
 
-    if (kn_from_resp) list_destroy(kn_from_resp, false);
+    if (kn_from_resp) list_destroy(kn_from_resp, true);
 
     result = true; 
 
