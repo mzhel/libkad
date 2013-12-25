@@ -249,7 +249,7 @@ kadpkt_create_pong(
 
     }
 
-    *(uint32_t*)pkt_data = port_from_no;
+    *(uint16_t*)pkt_data = port_from_no;
 
     if (!pkt_create(pkt_data, pkt_data_len, OP_KADEMLIAHEADER, KADEMLIA2_PONG, &kp)){
 
@@ -946,7 +946,7 @@ kadpkt_create_search_response(
 
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(kn_lst, e, nle);
 
-      kn = nle->node;
+      kn = &nle->kn;
 
       // Node id
 
