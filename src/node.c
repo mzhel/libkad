@@ -177,18 +177,35 @@ node_get_udp_key_by_ip(
 bool
 node_copy(
           KAD_NODE* kn_src,
-          KAD_NODE* kn_dst
+          KAD_NODE* kn_dst,
+          KAD_NODE** kn_dst_out
          )
 {
   bool result = false;
 
   do {
 
-    if (!kn_src || !kn_dst) break;
+    if (!kn_src) break;
+
+    if (!kn_dst){
+
+      kn_dst = (KAD_NODE*)mem_alloc(sizeof(KAD_NODE));
+
+      if (!kn_dst){
+
+        LOG_ERROR("Failed to allocate memory for node.");
+
+        break;
+
+      }
+
+    }
 
     memcpy(kn_dst, kn_src, sizeof(KAD_NODE));
 
     kn_dst->created = ticks_now_ms();
+
+    if (kn_dst_out) *kn_dst_out = kn_dst;
 
     result = true;
 

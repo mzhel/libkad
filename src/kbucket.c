@@ -9,8 +9,8 @@
 #include <byteswap.h>
 #include <ticks.h>
 #include <list.h>
-#include <nodelist.h>
 #include <node.h>
+#include <nodelist.h>
 #include <kbucket.h>
 #include <mem.h>
 #include <log.h>
@@ -380,6 +380,7 @@ kbucket_get_closest_to(
   KAD_NODE* kn = NULL;
   NODE_LIST_ENTRY* nle = NULL;
   uint32_t count = 0;
+  UINT128 dist;
 
   do {
 
@@ -395,23 +396,9 @@ kbucket_get_closest_to(
 
       if (kn->ip_verified) {
 
-        nle = (NODE_LIST_ENTRY*)mem_alloc(sizeof(NODE_LIST_ENTRY));
+        uint128_xor(trgt_id, &kn->id, &dist);
 
-        if (!nle) {
-          
-          LOG_ERROR("Failed to allocate memory for node list entry.");
-
-          break;
-
-        }
-
-        uint128_xor(trgt_id, &kn->id, &nle->dist);
-
-        nle->node = (void*)kn;
-
-        nodelist_add_entry(lst_inout, nle);
-
-        if (protect_picked_nodes) kn->in_use++;
+        nodelist_add_entry(lst_inout, kn, &dist, &nle);
 
       }
 
@@ -426,8 +413,6 @@ kbucket_get_closest_to(
       list_remove_last_entry(lst_inout, (void*)&nle);
 
       if (nle) {
-
-        if (protect_picked_nodes) ((KAD_NODE*)nle->node)->in_use--;
 
         mem_free(nle);
 

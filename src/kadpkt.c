@@ -134,7 +134,7 @@ kadpkt_create_search(
 
     if (!pkt_emit(kp, (uint8_t*)raw_pkt, raw_pkt_len, &bytes_emited)){
 
-      LOG_ERROR("Failed to emot packet to buffer.");
+      LOG_ERROR("Failed to emit packet to buffer.");
 
       break;
 
@@ -147,6 +147,8 @@ kadpkt_create_search(
     result = true;
 
   } while (false);
+
+  if (pkt_data) mem_free(pkt_data);
 
   if (kp) pkt_destroy(kp);
 

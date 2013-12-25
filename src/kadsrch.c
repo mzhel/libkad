@@ -78,6 +78,8 @@ kad_search_destroy(
 
     if (!kse) break;
 
+    LOG_DEBUG("(%d) Destroying search.", kse->id);
+
     // [LOCK] Here should be search lock deletion.
     
     if (kse->search_terms_data) mem_free(kse->search_terms_data);
@@ -98,40 +100,8 @@ kad_search_destroy(
 }
 
 bool
-kad_search_clear_used_nodes_list(
-                                 LIST* nle_lst 
-                                )
-{
-  bool result = false;
-  NODE_LIST_ENTRY* nle = NULL;
-
-  do {
-
-    if (!nle_lst) break;
-
-    LIST_EACH_ENTRY_WITH_DATA_BEGIN(nle_lst, e, nle);
-
-      if (nle && nle->node && ((KAD_NODE*)nle->node)->in_use){
-
-        ((KAD_NODE*)nle->node)->in_use--;
-
-      }
-
-    LIST_EACH_ENTRY_WITH_DATA_END(e);
-
-    list_destroy(nle_lst, true);
-
-    result = true;
-
-  } while (false);
-
-  return result;
-}
-
-bool
 kad_search_free_nodes_lists(
-                            KAD_SEARCH* kse,
-                            bool dec_in_use
+                            KAD_SEARCH* kse
                            )
 {
   bool result = false;
@@ -151,7 +121,7 @@ kad_search_free_nodes_lists(
 
     list_destroy(kse->nodes_to_try, false);
 
-    dec_in_use?kad_search_clear_used_nodes_list(kse->nodes_in_use):list_destroy(kse->nodes_in_use, true);
+    list_destroy(kse->nodes_in_use, true);
 
     kse->nodes_best = NULL;
 
@@ -262,10 +232,10 @@ kad_search_find_by_target(
 }
 
 bool
-kad_search_already_goinig(
-                          UINT128* id,
-                          LIST** kse_lst_ptr
-                          )
+kad_search_already_going(
+                         UINT128* id,
+                         LIST** kse_lst_ptr
+                         )
 {
   bool result = false;
   LIST* kse_lst = NULL;
@@ -371,7 +341,7 @@ kad_search_delete_from_ongoing(
 
     if (!kse || !kse_lst_ptr) break;
 
-    kad_search_free_nodes_lists(kse, false);
+    kad_search_free_nodes_lists(kse);
 
     if (!list_remove_entry_by_data(kse_lst_ptr, kse, false)){
 
@@ -406,7 +376,7 @@ kad_search_delete_all_from_ongoing(
 
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(kse_lst, e, kse);
 
-      kad_search_free_nodes_lists(kse, false);
+      kad_search_free_nodes_lists(kse);
 
       kad_search_destroy(kse);
 
@@ -515,7 +485,7 @@ kad_search_start(
     
     locked = true;
 
-    if (kad_search_already_goinig(id_to_find, kse_lst_ptr)){
+    if (kad_search_already_going(id_to_find, kse_lst_ptr)){
 
       LOG_WARN("(%d) Search for this id is already going, not starting new one.", kse->id);
 
@@ -571,7 +541,7 @@ kad_search_start(
 
       if (!query_count--) break;
 
-      if (kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)nle->node, &kse->target_id)){
+      if (kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)&nle->kn, &kse->target_id)){
 
         list_add_entry(&kse->nodes_tried, nle);
 
@@ -653,6 +623,8 @@ kad_search_prepare_to_stop(
   do {
     
     if (!kse || kse->stopping) break;
+
+    LOG_DEBUG("(%d) Stopping search.", kse->id);
 
     switch(kse->type){
 
@@ -969,6 +941,7 @@ kad_search_process_response(
   UINT128 dist_from_kn_in_resp;
   uint32_t best_kn_cnt = 0;
   bool new_best = false;
+  UINT128 tmp_dist;
 
   do {
 
@@ -1026,7 +999,7 @@ kad_search_process_response(
 
       LOG_DEBUG("(%d) Search type SEARCH_NODE.", kse->id);
 
-      kad_search_free_nodes_lists(kse, true);
+      kad_search_free_nodes_lists(kse);
 
       kse->answers++;
 
@@ -1040,7 +1013,7 @@ kad_search_process_response(
     
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(nle_tried_lst, e, nle_tried);
 
-      kn_resp = nle_tried->node;
+      kn_resp = &nle_tried->kn;
 
       dist_from_resp_kn = &nle_tried->dist;
 
@@ -1084,27 +1057,11 @@ kad_search_process_response(
           
           // Add responed node to nodes in use sorted by distance in ascending order.
           
-          nle_new = (NODE_LIST_ENTRY*)mem_alloc(sizeof(NODE_LIST_ENTRY));
-          
-          if (!nle_new){
+          uint128_copy(&dist_from_kn_in_resp, &tmp_dist);
 
-            LOG_ERROR("(%d) Failed to allocate memory for closest entry.", kse->id);
+          nodelist_add_entry(&kse->nodes_in_use, kn_in_resp, &tmp_dist, &nle_new);
 
-            break;
-
-          }
-
-          // Setup new node list entry.
-
-          uint128_copy(&dist_from_kn_in_resp, &nle_new->dist);
-
-          nle_new->node = kn_in_resp;
-
-          kn_in_resp->in_use++; // Because added to nodes_in_use list.
-
-          nodelist_add_entry(&kse->nodes_in_use, nle_new);
-
-          nodelist_add_entry(&kse->nodes_to_try, nle_new);
+          nodelist_add_existing_entry(&kse->nodes_to_try, nle_new);
 
           // Check if distance to target from node listed in response is lesser than from responded node.
           
@@ -1144,11 +1101,11 @@ kad_search_process_response(
 
             if (new_best){
 
-              nodelist_add_entry(&kse->nodes_best, nle_new);
+              nodelist_add_existing_entry(&kse->nodes_best, nle_new);
 
               // We send search packet to a node that have shortest distance to target.
                 
-              if (kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)nle_new->node, &kse->target_id)){
+              if (kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)&nle_new->kn, &kse->target_id)){
 
                 list_add_entry(&kse->nodes_tried, (void*)nle_new);
 
@@ -1198,7 +1155,7 @@ kad_search_process_last_node_response(
 
     if (!ks || !kse || !nle) break;
 
-    kn = nle->node;
+    kn = &nle->kn;
 
     switch(kse->type){
 
@@ -1373,7 +1330,7 @@ kad_search_jump_start(
 
           // Use this node to send next search request.
           
-          kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)nle->node, &kse->target_id);
+          kad_search_send_find_node_pkt(ks, kse, (KAD_NODE*)&nle->kn, &kse->target_id);
 
           // [QUESTION] With this break in place not all nodes from to_try list
           // will be checked, i think.
@@ -1416,7 +1373,9 @@ kad_search_expire(
 
     if (!kse || !expired_kse_lst) break;
 
-    kad_search_free_nodes_lists(kse, true);
+    LOG_DEBUG("(%d) Expiring search.", kse->id);
+
+    kad_search_free_nodes_lists(kse);
 
     list_add_entry(expired_kse_lst, kse);
 
@@ -2167,6 +2126,8 @@ kad_search_process_result(
       break;
 
     }
+
+    LOG_DEBUG("(%d) Prosessing results.", kse->id);
 
     SEARCH_LOCK(kse);
 

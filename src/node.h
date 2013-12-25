@@ -57,7 +57,8 @@ node_destroy(
 bool
 node_copy(
           KAD_NODE* kn_src,
-          KAD_NODE* kn_dst
+          KAD_NODE* kn_dst,
+          KAD_NODE** kn_dst_out
          );
 
 uint8_t

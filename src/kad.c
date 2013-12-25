@@ -347,7 +347,7 @@ kad_session_update(
   uint32_t kn_cnt = 0;
 
   do {
-/*
+
     if (ks->timers.self_lookup <= now){
 
       LOG_DEBUG("Self-lookup.");
@@ -357,7 +357,7 @@ kad_session_update(
       ks->timers.self_lookup = now + HR2MS(4);
 
     }
-*/
+
     if (ks->timers.udp_port_lookup <= now && kad_fw_udp_check_running(&ks->fw) && !kad_fw_extrn_port_valid(&ks->fw)){
 
       LOG_DEBUG("Ping packet to random node.");

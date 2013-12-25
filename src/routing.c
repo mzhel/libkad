@@ -340,7 +340,7 @@ routing_add_node(
 
         // Node found but we do not update it.
 
-        result = true;
+        result = false;
 
       }
 

@@ -427,7 +427,6 @@ kadproto_kademlia2_res(
   UINT128 dst_to_kn;
   bool updated = false;
   LIST* kn_from_resp = NULL;
-  bool added_to_zone = false;
 
   do {
 
@@ -455,7 +454,6 @@ kadproto_kademlia2_res(
 
     rem_len--;
 
-
     if (kad_search_is_udp_fw_check(ks, &trgt)){
 
       fw_chk = true;
@@ -473,8 +471,6 @@ kadproto_kademlia2_res(
       kn = NULL;
 
       kn_for_srch = NULL;
-
-      added_to_zone = false;
 
       // Node id
 
@@ -561,19 +557,11 @@ kadproto_kademlia2_res(
         
         if (routing_add_node(&ks->active_zones, rz, kn, kadses_get_pub_ip(ks), false, &updated, true)){
 
-          added_to_zone = true;
+          node_copy(kn, NULL, &kn_for_srch); 
 
         } else {
 
           LOG_WARN("Failed to add node to routing zone.");
-
-        }
-
-        if (added_to_zone){
-
-          node_copy(kn, kn_for_srch); 
-
-        } else {
 
           kn_for_srch = kn;
 
@@ -589,11 +577,11 @@ kadproto_kademlia2_res(
     
     kad_search_process_response(ks, &trgt, ip4_no, port_no, kn_from_resp, &ks->searches);
 
-    if (kn_from_resp) list_destroy(kn_from_resp, true);
-
     result = true; 
 
   } while (false);
+
+  if (kn_from_resp) list_destroy(kn_from_resp, true);
 
   return result;
 }

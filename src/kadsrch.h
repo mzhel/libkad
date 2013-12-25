@@ -105,14 +105,8 @@ kad_search_destroy(
                    );
 
 bool
-kad_search_clear_used_nodes_list(
-                                 LIST* nle_lst 
-                                );
-
-bool
 kad_search_free_nodes_lists(
-                            KAD_SEARCH* kse,
-                            bool dec_in_use
+                            KAD_SEARCH* kse
                            );
 
 bool
@@ -128,10 +122,10 @@ kad_search_find_by_target(
                          );
 
 bool
-kad_search_already_goinig(
-                          UINT128* id,
-                          LIST** kse_lst_ptr
-                          );
+kad_search_already_going(
+                         UINT128* id,
+                         LIST** kse_lst_ptr
+                         );
 
 bool
 kad_search_find_in_ongoing_by_targ_id(

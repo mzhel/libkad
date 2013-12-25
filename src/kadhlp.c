@@ -74,7 +74,7 @@ kadhlp_find_kn_in_nle_list(
 
     LIST_EACH_ENTRY_WITH_DATA_BEGIN(nle_lst, e, nle);
 
-      kn = nle->node;
+      kn = &nle->kn;
 
       if (0 == uint128_compare(dist, &kn->dist)){
 
