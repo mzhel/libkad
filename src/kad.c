@@ -383,7 +383,7 @@ kad_session_update(
         rz->next_bucket_timer = now + MIN2MS(1);
 
       }
-/*
+
       if (now >= rz->next_lookup_timer){
 
         LOG_DEBUG("Random lookup.");
@@ -393,7 +393,7 @@ kad_session_update(
         rz->next_lookup_timer = now + HR2MS(1);
 
       }
-*/
+
     LIST_EACH_ENTRY_WITH_DATA_END(e);
 
     // [IMPLEMENT] Empty zones consolidation.
