@@ -41,6 +41,15 @@ typedef struct _kad_session {
   KAD_OPTS opts;
 } KAD_SESSION;
 
+typedef struct _kad_session_status {
+  uint8_t version;
+  uint16_t udp_port;
+  uint16_t ext_udp_port;
+  bool fw;
+  bool fw_udp;
+  uint32_t pub_ip4_no;
+} KAD_SESSION_STATUS;
+
 uint32_t
 kadses_get_pub_ip(
                   KAD_SESSION* ks
@@ -67,6 +76,12 @@ kadses_set_pub_ip(
                   KAD_SESSION* ks,
                   uint32_t ip4_no
                   );
+
+bool
+kadses_get_status(
+                  void* ks,
+                  KAD_SESSION_STATUS* kss
+                 );
 
 #define QUEUE_IN_UDP(ks, p) queue_enq(ks->queue_in_udp, p)
 

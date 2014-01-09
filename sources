@@ -9,7 +9,6 @@ $LIBKADDIR$/src/comprs.c \
  $LIBKADDIR$/src/kadfw.c \
  $LIBKADDIR$/src/kadhlp.c \
  $LIBKADDIR$/src/kadfile.c \
- $LIBKADDIR$/src/pktasm.c \
  $LIBKADDIR$/src/tag.c \
  $LIBKADDIR$/src/packet.c \
  $LIBKADDIR$/src/routing.c \

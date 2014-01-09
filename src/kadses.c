@@ -104,3 +104,35 @@ kadses_set_pub_ip(
   return result;
 }
 
+bool
+kadses_get_status(
+                  void* ks,
+                  KAD_SESSION_STATUS* kss
+                 )
+{
+  bool result = false;
+  KAD_SESSION* ks_ = (KAD_SESSION*)ks;
+
+  do {
+
+    if (!ks || !kss) break;
+
+    kss->version = KADEMLIA_VERSION;
+
+    kss->udp_port = ks_->udp_port;
+
+    kad_fw_get_extrn_port(&ks_->fw, &kss->ext_udp_port);
+
+    kss->fw = kad_fw_firewalled(&ks_->fw);
+
+    kss->fw_udp = kad_fw_firewalled_udp(&ks_->fw);
+
+    kss->pub_ip4_no = kadses_get_pub_ip(ks_);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
