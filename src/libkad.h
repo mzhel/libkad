@@ -32,7 +32,7 @@ typedef struct _mule_callbacks {
   MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
 } MULE_CALLBACKS;
 
-typedef int (*ZLIB_UNCOMPRESS)(uint8_t* dest, uint64_t* dest_len_ptr, uint8_t* src, uint64_t src_len);
+typedef int (*ZLIB_UNCOMPRESS)(unsigned char FAR* dest, unsigned long FAR* dest_len_ptr, const unsigned char FAR * src, unsigned long src_len);
 
 typedef struct _zlib_callbacks {
   ZLIB_UNCOMPRESS uncompress;
