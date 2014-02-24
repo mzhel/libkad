@@ -18,7 +18,6 @@
 #include <cipher.h>
 #include <mem.h>
 #include <log.h>
-#include <zlib.h>
 
 bool
 compress_is_packet_compressed(
@@ -46,6 +45,7 @@ compress_is_packet_compressed(
 
 bool
 compress_uncompress_packet(
+                           KAD_SESSION* ks,
                            uint8_t* pkt,
                            uint32_t pkt_len,
                            uint8_t** unk_pkt_out,
@@ -58,7 +58,9 @@ compress_uncompress_packet(
 
   do {
 
-    if (!pkt || !pkt_len || !unk_pkt_out || !unk_pkt_len_out) break;
+    if (!ks || !pkt || !pkt_len || !unk_pkt_out || !unk_pkt_len_out) break;
+
+    if (!ks->zcbs.uncompress) break;
 
     unk_pkt_len = pkt_len * 10 + 300;
 
@@ -72,7 +74,7 @@ compress_uncompress_packet(
 
     }
 
-    if (Z_OK != uncompress(unk_pkt + 2, &unk_pkt_len, pkt + 2, pkt_len - 2)){
+    if (0 != ks->zcbs.uncompress(unk_pkt + 2, &unk_pkt_len, pkt + 2, pkt_len - 2)){
 
       LOG_ERROR("Uncompress failed.");
 
@@ -99,6 +101,7 @@ compress_uncompress_packet(
 
 bool
 compress_uncompress_block(
+                          KAD_SESSION* ks,
                           uint8_t* block_data,
                           uint32_t block_data_len,
                           uint8_t** decomp_data_out,
@@ -112,7 +115,9 @@ compress_uncompress_block(
 
   do {
 
-    if (!block_data || !block_data_len || !decomp_data_out || !decomp_len_out) break;
+    if (!ks || !block_data || !block_data_len || !decomp_data_out || !decomp_len_out) break;
+
+    if (!ks->zcbs.uncompress) break;
 
     unk_data_len = block_data_len * 10 + 300;
 
@@ -128,9 +133,9 @@ compress_uncompress_block(
 
     do {
 
-      res = uncompress(unk_data, &unk_data_len, block_data, block_data_len);
+      res = ks->zcbs.uncompress(unk_data, &unk_data_len, block_data, block_data_len);
 
-      if (res == Z_BUF_ERROR){
+      if (res == -5){
 
         unk_data_len *= 2;
 
@@ -138,11 +143,11 @@ compress_uncompress_block(
 
       }
 
-      if (res == Z_OK) break;
+      if (res == 0) break;
 
     } while (true);
 
-    if (Z_OK != res){
+    if (0 != res){
 
       LOG_ERROR("Decompression failed.");
 

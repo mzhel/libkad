@@ -9,6 +9,7 @@ compress_is_packet_compressed(
 
 bool
 compress_uncompress_packet(
+                           KAD_SESSION* ks,
                            uint8_t* pkt,
                            uint32_t pkt_len,
                            uint8_t** unk_pkt_out,

@@ -969,6 +969,7 @@ kad_deq_and_handle_control_packet(
       LOG_DEBUG("Packet compressed.");
 
       if (!compress_uncompress_packet(
+                                      ks,
                                       dec_pkt,
                                       dec_pkt_len,
                                       &unk_pkt,

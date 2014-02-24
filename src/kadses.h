@@ -18,6 +18,12 @@ typedef struct _mule_callbacks {
   MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
 } MULE_CALLBACKS;
 
+typedef int (*ZLIB_UNCOMPRESS)(uint8_t* dest, uint64_t* dest_len_ptr, uint8_t* src, uint64_t src_len);
+
+typedef struct _zlib_callbacks {
+  ZLIB_UNCOMPRESS uncompress;
+} ZLIB_CALLBACKS;
+
 typedef struct _kad_opts {
   bool use_extrn_udp_port;
 } KAD_OPTS;
@@ -52,6 +58,7 @@ typedef struct _kad_session {
   KAD_OPTS opts;
   MULE_SESSION* mule_session;
   MULE_CALLBACKS mcbs;
+  ZLIB_CALLBACKS zcbs;
 } KAD_SESSION;
 
 typedef struct _kad_session_status {

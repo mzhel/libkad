@@ -270,3 +270,24 @@ kadses_set_mule_callbacks(
 
   return result;
 }
+
+bool
+kadses_set_zlib_callbacks(
+                          KAD_SESSION* ks,
+                          ZLIB_CALLBACKS* zcbs
+                         )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks || !zcbs) break;
+
+    memcpy(&ks->zcbs, zcbs, sizeof(ZLIB_CALLBACKS));
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
