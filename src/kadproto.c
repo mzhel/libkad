@@ -15,6 +15,7 @@
 #include <kadses.h>
 #include <kadsrch.h>
 #include <kadproto.h>
+#include <kadhlp.h>
 #include <kadqpkt.h>
 #include <packet.h>
 #include <ticks.h>
@@ -539,6 +540,8 @@ kadproto_kademlia2_res(
       if (fw_chk){
 
         // This is response to firewall check request.
+
+        LOG_DEBUG("Adding node to udp firewall check list.");
         
         if (!kad_fw_add_node_for_udp_check(&ks->fw, kn)){
 
@@ -924,12 +927,15 @@ kadproto_kademlia2_hello_req(
 
     res_queued = true;
 
-    // [TODO] ping and firewall check
+    // [TODO] ping
     
-    if (kad_fw_need_more_udp_checks(&ks->fw)){
+    if (kad_fw_need_more_tcp_checks(&ks->fw)){
 
-      // kad_fw_queue_check_pkt
-      // [IMPLEMENT] sources implementation needed.
+      if (kadhlp_send_fw_check_tcp(ks, &kn_id, ip4_no, port_no, sndr_key, ks->tcp_port)){
+
+        kad_fw_add_source_for_inbound_tcp_check(ks, &ks->fw, &kn_id, ip4_no, tcp_port, udp_port);
+
+      }
 
     }
 
@@ -1074,10 +1080,15 @@ kadproto_kademlia2_hello_res(
 
     }
 
-    if (kad_fw_need_more_udp_checks(&ks->fw)){
+    // [TODO] ping
 
-      // kad_fw_queue_check_pkt
-      // [IMPLEMENT] sources implementation needed.
+    if (kad_fw_need_more_tcp_checks(&ks->fw)){
+
+      if (kadhlp_send_fw_check_tcp(ks, &kn_id, ip4_no, port_no, sndr_key, ks->tcp_port)){
+
+        kad_fw_add_source_for_inbound_tcp_check(ks, &ks->fw, &kn_id, ip4_no, tcp_port, udp_port);
+
+      }
 
     }
 
@@ -1107,6 +1118,8 @@ kadproto_kademlia2_fw_udp(
   uint8_t already_known;
   uint16_t inc_port = 0;
   bool udp_fwld = false;
+  bool answ_to_ext_port = false;
+  bool answ_to_int_port = false;
 
   do {
 
@@ -1130,8 +1143,18 @@ kadproto_kademlia2_fw_udp(
 
       rem_len -= sizeof(uint16_t);
 
-      // [IMPLEMENT] // kad_fw_udp_check_response
-      
+      kad_fw_udp_check_response(
+                                &ks->fw, 
+                                already_known, 
+                                ip4_no, 
+                                ks->udp_port,
+                                inc_port,
+                                &answ_to_int_port,
+                                &answ_to_ext_port
+                               );
+
+      if (answ_to_ext_port) ks->opts.use_extrn_udp_port = true;
+
       // [IMPLEMENT] // callback for udp firewalled status
 
     result = true;
@@ -1152,7 +1175,9 @@ kadproto_kademlia2_firewalled_res(
 {
   bool result = false;
   uint32_t fw_ip4_no = 0;
-
+#ifdef CONFIG_VERBOSE
+  struct in_addr in;
+#endif
   do {
 
     if (!ks || !pkt_data || !pkt_data_len) break;
@@ -1160,6 +1185,14 @@ kadproto_kademlia2_firewalled_res(
     fw_ip4_no = htonl(*(uint32_t*)pkt_data);
 
     kadses_set_pub_ip(ks, fw_ip4_no);
+
+#ifdef CONFIG_VERBOSE
+
+    in.s_addr = fw_ip4_no;
+
+#endif
+
+    LOG_DEBUG("Public ip: %s", inet_ntoa(in));
 
     // [IMPLEMENT] callback about public ip resolved
 

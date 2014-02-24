@@ -785,7 +785,7 @@ kadpkt_parse_hello(
 
     uint128_from_buffer(&kn_id, p, rem_len, false);
 
-    LOG_DEBUG("id: ", ((UINT128*)&kn_id));
+    LOG_DEBUG_UINT128("id: ", ((UINT128*)&kn_id));
 
     p += sizeof(UINT128);
 

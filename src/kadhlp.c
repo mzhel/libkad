@@ -367,6 +367,117 @@ kadhlp_send_hello_req_pkt_to_node(
 }
 
 bool
+kadhlp_send_fw_check_udp(
+                         KAD_SESSION* ks,
+                         uint16_t check_port,
+                         uint32_t key,
+                         uint32_t ip4_no
+                        )
+{
+  bool result = false;
+  void* pkt = NULL;
+  uint32_t pkt_len = 0;
+
+  do {
+
+    if (!ks) break;
+
+    if (!kadpkt_create_fw_check_udp(
+                                    false, 
+                                    check_port,
+                                    &pkt,
+                                    &pkt_len
+                                   )
+    ){
+
+      LOG_ERROR("Failed to create fw check udp.");
+
+      break;
+
+    }
+
+    if (!kadses_create_queue_udp_pkt(
+                                     ks,
+                                     ip4_no,
+                                     htons(check_port),
+                                     NULL,
+                                     key,
+                                     pkt,
+                                     pkt_len
+                                    )
+    ){
+
+      LOG_ERROR("Failed to queue udp packet.");
+
+      break;
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  if (!result && pkt) mem_free(pkt);
+
+  return result;
+}
+
+bool
+kadhlp_send_fw_check_tcp(
+                         KAD_SESSION* ks,
+                         UINT128* node_id,
+                         uint32_t ip4_no,
+                         uint16_t port_no,
+                         uint32_t sender_key,
+                         uint16_t tcp_port
+                        )
+{
+  bool result = false;
+  UINT128 hash_id;
+  void* pkt = NULL;
+  uint32_t pkt_len = 0;
+
+  do {
+
+    if (!ks || !node_id) break;
+
+    uint128_from_buffer(&hash_id, ks->user_hash, sizeof(ks->user_hash), true);
+
+    if (!kadpkt_create_fw_check(tcp_port, &hash_id, 0x00, &pkt, &pkt_len)){
+
+      LOG_ERROR("Failed to create firewall check request packet.");
+
+      break;
+
+    }
+
+    if (!kadses_create_queue_udp_pkt(
+                                     ks,
+                                     ip4_no,
+                                     port_no,
+                                     node_id,
+                                     sender_key,
+                                     pkt,
+                                     pkt_len
+                                    )
+    ){
+
+      LOG_ERROR("Failed to queue udp packet.");
+
+      break;
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  if (!result && pkt) mem_free(pkt);
+
+  return result;
+}
+
+bool
 kadhlp_calc_udp_verify_key(
                            uint32_t udp_key,
                            uint32_t ip4_no,

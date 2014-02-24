@@ -7,6 +7,17 @@
 
 #define DATA_PACKET_QUEUE_LENGTH 64
 
+typedef struct _mule_session MULE_SESSION;
+
+typedef bool (*MULE_ADD_SOURCE_FOR_UDP_FW_CHECK)(MULE_SESSION* ms, UINT128* id, uint32_t ip4_no, uint16_t tcp_port_no,  uint16_t udp_port_no);
+
+typedef bool (*MULE_ADD_SOURCE_FOR_TCP_FW_CHECK)(void* ms, void* id, uint32_t ip4_no, uint16_t tcp_port_no,  uint16_t udp_port_no);
+
+typedef struct _mule_callbacks {
+  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_udp_fw_check;
+  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
+} MULE_CALLBACKS;
+
 typedef struct _kad_opts {
   bool use_extrn_udp_port;
 } KAD_OPTS;
@@ -39,6 +50,8 @@ typedef struct _kad_session {
   KAD_FW fw;
   KAD_SESSION_TIMERS timers;
   KAD_OPTS opts;
+  MULE_SESSION* mule_session;
+  MULE_CALLBACKS mcbs;
 } KAD_SESSION;
 
 typedef struct _kad_session_status {
@@ -82,6 +95,29 @@ kadses_get_status(
                   void* ks,
                   KAD_SESSION_STATUS* kss
                  );
+
+bool
+kadses_calc_verify_key(
+                       void* ks,
+                       uint32_t ip4_no,
+                       uint32_t* key_out
+                      );
+
+bool
+kadses_bootstrap_from_node(
+                           void* ks,
+                           uint32_t ip4_no,
+                           uint16_t port_no
+                           );
+
+bool
+kadses_send_fw_check_udp(
+                         void* ks,
+                         uint16_t check_port,
+                         uint32_t key,
+                         uint32_t ip4_no
+                        );
+
 
 #define QUEUE_IN_UDP(ks, p) queue_enq(ks->queue_in_udp, p)
 

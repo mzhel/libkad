@@ -12,6 +12,7 @@
 #include <kadqpkt.h>
 #include <kadfw.h>
 #include <kadses.h>
+#include <kadhlp.h>
 
 uint32_t
 kadses_get_pub_ip(
@@ -136,3 +137,136 @@ kadses_get_status(
   return result;
 }
 
+bool
+kadses_calc_verify_key(
+                       void* ks,
+                       uint32_t ip4_no,
+                       uint32_t* key_out
+                      )
+{
+  bool result = false;
+
+  do {
+
+    result = kadhlp_calc_udp_verify_key(((KAD_SESSION*)ks)->udp_key, ip4_no, key_out);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadses_bootstrap_from_node(
+                           void* ks,
+                           uint32_t ip4_no,
+                           uint16_t port_no
+                           )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks) break;
+
+    if (!kadhlp_send_bootstrap_pkt((KAD_SESSION*)ks, ip4_no, port_no)){
+
+      LOG_ERROR("Failed to send bootstrap packet to node");
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+bool
+kadses_send_fw_check_udp(
+                         void* ks,
+                         uint16_t check_port,
+                         uint32_t key,
+                         uint32_t ip4_no
+                        )
+{
+  bool result = false;
+
+  do {
+
+    result = kadhlp_send_fw_check_udp((KAD_SESSION*)ks, check_port, key, ip4_no);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadses_fw_check_response(
+                         void* ks
+                        )
+{
+  bool result = false;
+
+  do {
+
+  result = kad_fw_check_response(&((KAD_SESSION*)ks)->fw);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadses_fw_dec_checks_running(
+                             void* ks
+                            )
+{
+  bool result = false;
+
+  do {
+
+    result = kad_fw_dec_checks_running(&((KAD_SESSION*)ks)->fw);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadses_fw_dec_checks_running_udp(
+                                 void* ks
+                                )
+{
+  bool result = false;
+
+  do {
+
+    result = kad_fw_dec_checks_running_udp(&((KAD_SESSION*)ks)->fw);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadses_set_mule_callbacks(
+                          KAD_SESSION* ks,
+                          MULE_SESSION* ms,
+                          MULE_CALLBACKS* mcbs
+                         )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks || !ms || !mcbs) break;
+
+    ks->mule_session = ms;
+
+    memcpy(&ks->mcbs, mcbs, sizeof(MULE_CALLBACKS));
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}

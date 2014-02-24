@@ -364,9 +364,30 @@ kad_session_update(
 
     }
 
+    if (
+        !kad_fw_udp_check_started(&ks->fw) && 
+        kad_fw_udp_check_running(&ks->fw) &&
+        kad_fw_need_more_udp_checks(&ks->fw)
+      ){
+
+      ks->fw.udp_check_running = true; 
+
+      LOG_DEBUG("Starting search for nodes for udp firewall check.");
+
+      kad_search_find_node_for_fw_check(
+                                        ks,
+                                        ks->root_zone,
+                                        &ks->kad_id, 
+                                        &ks->searches
+                                       );
+
+    }
+
     if (kad_fw_extrn_port_valid(&ks->fw) && kad_fw_need_more_udp_checks(&ks->fw)){
 
-      // [IMPLEMENT] kad_fw_next_udp_check_request()
+      LOG_DEBUG("Sending udp firewall check request.");
+
+      kad_fw_udp_check_request(ks);
 
     }
 

@@ -11,7 +11,7 @@ typedef struct _kad_fw {
   bool udp_check_running;
   uint32_t udp_checks_finished_cnt;
   uint32_t udp_checks_running_cnt;
-  uint32_t tcp_checks_running;
+  uint32_t tcp_checks_running_cnt;
   LIST* extrn_port_asked_ips;
   LIST* extrn_ports;
   bool extrn_udp_port_valid;
@@ -23,7 +23,7 @@ typedef struct _kad_fw {
 } KAD_FW;
 
 typedef struct _udp_fw_check_node {
-  KAD_NODE* kn;
+  KAD_NODE kn;
   bool answered;
   bool ext_port_answer;
   bool int_port_answer;
@@ -102,6 +102,51 @@ kad_fw_set_status_udp(
 
 bool
 kad_fw_need_more_udp_checks(
+                            KAD_FW* kfw
+                            );
+bool
+kad_fw_udp_check_request(
+                         void* hks
+                        );
+
+bool
+kad_fw_udp_check_response(
+                          KAD_FW* fw,
+                          bool already_known,
+                          uint32_t ip4_no,
+                          uint16_t int_port,
+                          uint16_t inc_port,
+                          bool* answ_to_int_port_out,
+                          bool* answ_to_ext_port_out
+                         );
+
+bool
+kad_fw_check_response(
+                      KAD_FW* fw
+                     );
+
+bool
+kad_fw_dec_checks_running(
+                          KAD_FW* fw
+                         );
+
+bool
+kad_fw_dec_checks_running_udp(
+                              KAD_FW* fw
+                             );
+
+bool
+kad_fw_add_source_for_inbound_tcp_check(
+                                        void* hks,
+                                        KAD_FW* fw,
+                                        UINT128* id,
+                                        uint32_t ip4_no,
+                                        uint16_t tcp_port,
+                                        uint16_t udp_port
+                                       );
+
+bool
+kad_fw_need_more_tcp_checks(
                             KAD_FW* kfw
                             );
 

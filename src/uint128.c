@@ -42,7 +42,7 @@ uint128_from_buffer(
 
     if (bigEndian){
 
-      for (uint8_t i = 0; i < bufferLen; i++){
+      for (uint8_t i = 0; i < sizeof(UINT128) / 4; i++){
 
         ui128->data.dwordData[i] = BSWAP32(((uint32_t*)buffer)[i]);
 

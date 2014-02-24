@@ -45,6 +45,24 @@ kadhlp_send_hello_req_pkt_to_node(
                                  );
 
 bool
+kadhlp_send_fw_check_udp(
+                         KAD_SESSION* ks,
+                         uint16_t check_port,
+                         uint32_t key,
+                         uint32_t ip4_no
+                        );
+
+bool
+kadhlp_send_fw_check_tcp(
+                         KAD_SESSION* ks,
+                         UINT128* node_id,
+                         uint32_t ip4_no,
+                         uint16_t port_no,
+                         uint32_t sender_key,
+                         uint16_t tcp_port
+                        );
+
+bool
 kadhlp_calc_udp_verify_key(
                            uint32_t udp_key,
                            uint32_t ip4_no,
