@@ -142,6 +142,11 @@ kadses_send_fw_check_udp(
                          uint32_t ip4_no
                         );
 
+bool
+kadses_save_nodes_to_file(
+                          KAD_SESSION* ks,
+                          char* file_path
+                         );
 
 #define QUEUE_IN_UDP(ks, p) queue_enq(ks->queue_in_udp, p)
 

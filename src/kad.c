@@ -279,12 +279,17 @@ kad_session_init(
 
 bool
 kad_session_uninit(
-                   KAD_SESSION* ks
+                   KAD_SESSION* ks,
+                   char* nodes_file_path
                    )
 {
   bool result = false;
 
   do {
+
+    if (!ks) break;
+
+    if (nodes_file_path) kadses_save_nodes_to_file(ks, nodes_file_path);
 
     kadhlp_destroy_qpkt_queue(ks, ks->queue_in_udp);
 

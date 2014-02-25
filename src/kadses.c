@@ -312,3 +312,41 @@ kadses_set_cipher_callbacks(
 
   return result;
 }
+
+bool
+kadses_save_nodes_to_file(
+                          KAD_SESSION* ks,
+                          char* file_path
+                         )
+{
+  bool result = false;
+  LIST* kn_lst = NULL;
+
+  do {
+
+    if (!ks || !file_path) break;
+
+    if (!routing_get_nodes_list(ks->root_zone, &kn_lst)){
+
+      LOG_ERROR("Failed to get nodes list.");
+
+      break;
+
+    }
+
+    if (!kadhlp_create_nodes_dat(kn_lst, file_path)){
+
+      LOG_ERROR("Failed to create nodes file - %s.", file_path);
+
+      break;
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  if (kn_lst) list_destroy(kn_lst, true);
+
+  return result;
+}

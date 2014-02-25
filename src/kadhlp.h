@@ -83,6 +83,12 @@ kadhlp_destroy_qpkt_queue(
                           );
 
 bool
+kadhlp_create_nodes_dat(
+                        LIST* kn_lst,
+                        char* file_path
+                       );
+
+bool
 kadhlp_parse_nodes_dat(
                        KAD_SESSION* ks,
                        char* file_path,

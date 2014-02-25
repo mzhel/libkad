@@ -137,5 +137,11 @@ routing_get_bootstrap_contacts(
                               bool top_level_call
                               );
 
+bool
+routing_get_nodes_list(
+                       ROUTING_ZONE* rz,
+                       LIST** kn_lst_out
+                      );
+
 #endif // _ROUTING_H_
 

@@ -578,6 +578,90 @@ kadhlp_destroy_qpkt_queue(
 }
 
 bool
+kadhlp_create_nodes_dat(
+                        LIST* kn_lst,
+                        char* file_path
+                       )
+{
+  bool result = false;
+  KAD_FILE* kf = NULL;
+  uint32_t kn_cnt = 0;
+  KAD_NODE* kn = NULL;
+
+  do {
+
+    if (!kn_lst || !file_path) break;
+
+    list_entries_count(kn_lst, &kn_cnt);
+
+    if (!kn_cnt) break;
+
+    if (!kadfile_open_overwrite(file_path, &kf)){
+
+      LOG_ERROR("Failed to create file %s", file_path);
+      
+      break;
+
+    }
+
+    // Zero counter for older versions.
+    
+    kadfile_write_uint32(kf, 0);
+
+    // Nodes file version.
+   
+    kadfile_write_uint32(kf, 2);
+
+    // Nodes count.
+    
+    kadfile_write_uint32(kf, kn_cnt);
+
+    LIST_EACH_ENTRY_WITH_DATA_BEGIN(kn_lst, e, kn);
+
+      // Id
+     
+      kadfile_write_uint128(kf, &kn->id);
+
+      // Ip address
+      
+      kadfile_write_uint32(kf, ntohl(kn->ip4_no));
+
+      // Udp port
+      
+      kadfile_write_uint16(kf, ntohs(kn->udp_port_no));
+
+      // Tcp port 
+      
+      kadfile_write_uint16(kf, ntohs(kn->tcp_port_no));
+
+      // Version
+
+      kadfile_write_uint8(kf, kn->version);
+
+      // Udp key
+      
+      kadfile_write_uint32(kf, kn->udp_key);
+
+      // Ip for udp key 
+      
+      kadfile_write_uint32(kf, ntohs(kn->udp_key_ip4_no));
+      
+      // Ip verified
+      
+      kadfile_write_uint8(kf, kn->ip_verified?1:0);
+
+    LIST_EACH_ENTRY_WITH_DATA_END(e);
+
+    result = true;
+
+  } while (false);
+
+  if (kf) kadfile_close(kf);
+
+  return result;
+}
+
+bool
 kadhlp_parse_nodes_dat(
                        KAD_SESSION* ks,
                        char* file_path,
@@ -591,7 +675,7 @@ kadhlp_parse_nodes_dat(
   uint32_t kn_cnt = 0;
   UINT128 id;
   UINT128 dist;
-  uint32_t ip4_no;
+  uint32_t ip4;
   uint16_t udp_port;
   uint16_t tcp_port;
   uint8_t type;
@@ -658,7 +742,7 @@ kadhlp_parse_nodes_dat(
 
       // node ip address
 
-      kadfile_read_uint32(kf, &ip4_no);
+      kadfile_read_uint32(kf, &ip4);
 
       file_len -= sizeof(uint32_t);
 
@@ -701,7 +785,7 @@ kadhlp_parse_nodes_dat(
       if (!node_create(
                        &id,
                        htonl(udp_key_ip4),
-                       htonl(ip4_no),
+                       htonl(ip4),
                        htons(tcp_port),
                        htons(udp_port),
                        contact_ver,

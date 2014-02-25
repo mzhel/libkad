@@ -764,3 +764,32 @@ routing_get_bootstrap_contacts(
 
   return result;
 }
+
+bool
+routing_get_nodes_list(
+                       ROUTING_ZONE* rz,
+                       LIST** kn_lst_out
+                      )
+{
+  bool result = false;
+
+  do {
+
+    if (!rz || !kn_lst_out) break;
+
+    if (rz->kb){
+
+      kbucket_get_nodes(rz->kb, kn_lst_out);
+
+    }
+
+    routing_get_nodes_list(rz->sub_zones[0], kn_lst_out);
+
+    routing_get_nodes_list(rz->sub_zones[1], kn_lst_out);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}

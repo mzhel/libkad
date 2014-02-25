@@ -11,7 +11,8 @@ kad_session_init(
 
 bool
 kad_session_uninit(
-                   KAD_SESSION* ks
+                   KAD_SESSION* ks,
+                   char* nodes_file_path
                    );
 
 bool

@@ -22,7 +22,6 @@ kadfile_open_read(
 
     if (!file_path || !kf_out) break;
 
-
     kf = (KAD_FILE*)mem_alloc(sizeof(KAD_FILE));
 
     if (!kf){
@@ -64,6 +63,52 @@ kadfile_open_read(
   return result;
 }
 
+bool
+kadfile_open_overwrite(
+                       char* file_path,
+                       KAD_FILE** kf_out
+                      )
+{
+  bool result = false;
+  FILE* f = NULL;
+  KAD_FILE* kf = NULL;
+
+  do {
+
+    if (!file_path || !kf_out) break;
+
+    kf = (KAD_FILE*)mem_alloc(sizeof(KAD_FILE));
+
+    if (!kf){
+
+      LOG_ERROR("Failed to allocate memory or kad file.");
+
+      break;
+
+    }
+
+    f = fopen(file_path, "wb");
+
+    if (!f){
+
+      LOG_ERROR("Failed to open file.");
+
+      break;
+
+    }
+
+    kf->f = f;
+
+    *kf_out = kf;
+
+    result = true;
+
+  } while (false);
+
+  if (!result && kf) mem_free(kf);
+
+  return result;
+}
 bool
 kadfile_close(
               KAD_FILE* kf
@@ -132,6 +177,27 @@ kadfile_read_uint8(
 }
 
 bool
+kadfile_write_uint8(
+                    KAD_FILE* kf,
+                    uint8_t ui8
+                   )
+{
+  bool result = false;
+
+  do {
+
+    if (!kf) break;
+
+    if (1 != fwrite(&ui8, 1, 1, kf->f)) break;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
 kadfile_read_uint16(
                     KAD_FILE* kf,
                     uint16_t* ui16_out
@@ -147,6 +213,27 @@ kadfile_read_uint16(
     if (2 != fread(&ui16, 1, 2, kf->f)) break;
 
     if (ui16_out) *ui16_out = ui16;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadfile_write_uint16(
+                     KAD_FILE* kf,
+                     uint16_t ui16
+                    )
+{
+  bool result = false;
+
+  do {
+
+    if (!kf) break;
+
+    if (2 != fwrite(&ui16, 1, 2, kf->f)) break;
 
     result = true;
 
@@ -180,6 +267,27 @@ kadfile_read_uint32(
 }
 
 bool
+kadfile_write_uint32(
+                     KAD_FILE* kf,
+                     uint32_t ui32
+                    )
+{
+  bool result = false;
+
+  do {
+
+    if (!kf) break;
+
+    if (4 != fwrite(&ui32, 1, 4, kf->f)) break;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
 kadfile_read_uint64(
                     KAD_FILE* kf,
                     uint64_t* ui64_out
@@ -204,6 +312,27 @@ kadfile_read_uint64(
 }
 
 bool
+kadfile_write_uint64(
+                     KAD_FILE* kf,
+                     uint64_t ui64
+                    )
+{
+  bool result = false;
+
+  do {
+
+    if (!kf) break;
+
+    if (4 != fread(&ui64, 1, 4, kf->f)) break;
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
 kadfile_read_uint128(
                      KAD_FILE* kf,
                      UINT128* ui128_out
@@ -218,6 +347,31 @@ kadfile_read_uint128(
     for (uint32_t i = 0; i < UINT128_DWORDS_COUNT; i++){
 
       kadfile_read_uint32(kf, &ui128_out->data.dwordData[i]);
+
+    }
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kadfile_write_uint128(
+                      KAD_FILE* kf,
+                      UINT128* ui128
+                     )
+{
+  bool result = false;
+
+  do {
+
+    if (!kf || !ui128) break;
+
+    for (uint32_t i = 0; i < UINT128_DWORDS_COUNT; i++){
+
+      kadfile_write_uint32(kf, ui128->data.dwordData[i]);
 
     }
 
