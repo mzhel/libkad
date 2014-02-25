@@ -346,7 +346,7 @@ kadses_save_nodes_to_file(
 
   } while (false);
 
-  if (kn_lst) list_destroy(kn_lst, true);
+  if (kn_lst) list_destroy(kn_lst, false);
 
   return result;
 }
