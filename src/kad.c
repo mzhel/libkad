@@ -210,7 +210,7 @@ kad_session_init(
 
     ks->version = KADEMLIA_VERSION;
 
-    random_init();
+    random_init(ticks_now_ms());
 
     he = gethostbyname("localhost");
 
@@ -816,6 +816,7 @@ kad_get_control_packet_to_send(
       LOG_DEBUG("sndr_verify_key = %.8x", sndr_verify_key);
 
       cipher_encrypt_packet(
+                            ks,
                             qpkt->pkt, 
                             qpkt->pkt_len, 
                             &qpkt->kad_id, 
@@ -936,6 +937,7 @@ kad_deq_and_handle_control_packet(
       LOG_DEBUG("Packet encrypted.");
 
       if (!cipher_decrypt_packet(
+                                 ks,
                                  qpkt->pkt,
                                  qpkt->pkt_len,
                                  qpkt->ip4_no,

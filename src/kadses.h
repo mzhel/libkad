@@ -18,11 +18,25 @@ typedef struct _mule_callbacks {
   MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
 } MULE_CALLBACKS;
 
-typedef int (*ZLIB_UNCOMPRESS)(unsigned char FAR* dest, unsigned long FAR* dest_len_ptr, const unsigned char FAR * src, unsigned long src_len);
+typedef int (*ZLIB_UNCOMPRESS)(unsigned char * dest, unsigned long * dest_len_ptr, const unsigned char * src, unsigned long src_len);
 
 typedef struct _zlib_callbacks {
   ZLIB_UNCOMPRESS uncompress;
 } ZLIB_CALLBACKS;
+
+typedef struct arc4_context {
+  uint8_t data[512];
+} ARC4_CONTEXT;
+
+typedef void (*MD5)(const unsigned char *input, size_t ilen, unsigned char output[16]);
+typedef void (*ARC4_SETUP)(struct arc4_context *ctx, const unsigned char *key, unsigned int keylen);
+typedef int (*ARC4_CRYPT)(struct arc4_context *ctx, size_t length, const unsigned char *input, unsigned char *output);
+
+typedef struct _cipher_callbacks {
+  MD5 md5;
+  ARC4_SETUP arc4_setup;
+  ARC4_CRYPT arc4_crypt;
+} CIPHER_CALLBACKS;
 
 typedef struct _kad_opts {
   bool use_extrn_udp_port;
@@ -59,6 +73,7 @@ typedef struct _kad_session {
   MULE_SESSION* mule_session;
   MULE_CALLBACKS mcbs;
   ZLIB_CALLBACKS zcbs;
+  CIPHER_CALLBACKS ccbs;
 } KAD_SESSION;
 
 typedef struct _kad_session_status {

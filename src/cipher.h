@@ -13,6 +13,7 @@ cipher_is_packet_encrypted(
 
 bool
 cipher_decrypt_packet(
+                      KAD_SESSION* ks,
                       uint8_t* pkt,
                       uint32_t pkt_len,
                       uint32_t ip4_no,
@@ -26,6 +27,7 @@ cipher_decrypt_packet(
 
 bool
 cipher_encrypt_packet(
+                      KAD_SESSION* ks,
                       uint8_t* pkt,
                       uint32_t pkt_len,
                       UINT128* id,

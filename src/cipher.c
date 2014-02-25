@@ -14,8 +14,6 @@
 #include <kadses.h>
 #include <kadhlp.h>
 #include <random.h>
-#include <polarssl/md5.h>
-#include <polarssl/arc4.h>
 #include <protocols.h>
 #include <cipher.h>
 #include <mem.h>
@@ -89,6 +87,7 @@ cipher_is_packet_encrypted(
 
 bool
 cipher_decrypt_packet(
+                      KAD_SESSION* ks,
                       uint8_t* pkt,
                       uint32_t pkt_len,
                       uint32_t ip4_no,
@@ -110,7 +109,7 @@ cipher_decrypt_packet(
   uint8_t key_data_len = 0;
   bool rcvr_key_used = false;
   uint8_t md5_dgst[16];
-  arc4_context rc4_ctx;
+  struct arc4_context rc4_ctx;
   uint8_t tries = 2;
   uint32_t magic_val = 0;
   uint8_t* p = NULL;
@@ -121,6 +120,8 @@ cipher_decrypt_packet(
   do {
 
     if (!pkt || !pkt_len || !pkt_out_ptr || !pkt_out_len_ptr || !rcvr_verify_key_out || !sndr_verify_key_out) break;
+
+    if (!ks->ccbs.md5 || !ks->ccbs.arc4_setup || !ks->ccbs.arc4_crypt) break;
 
     if (pkt_len < CIPHER_HEADER_WITHOUT_PADDING_LEN){
 
@@ -178,9 +179,9 @@ cipher_decrypt_packet(
 
       }
 
-      md5((uint8_t*)&key_data, key_data_len, md5_dgst);
+      ks->ccbs.md5((uint8_t*)&key_data, key_data_len, md5_dgst);
 
-      arc4_setup(&rc4_ctx, md5_dgst, sizeof(md5_dgst));
+      ks->ccbs.arc4_setup(&rc4_ctx, md5_dgst, sizeof(md5_dgst));
 
       // Try to decrypt magic value.
       
@@ -188,7 +189,7 @@ cipher_decrypt_packet(
 
       magic_val = 0;
 
-      arc4_crypt(&rc4_ctx, sizeof(magic_val), p, (uint8_t*)&magic_val);
+      ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(magic_val), p, (uint8_t*)&magic_val);
 
       if (magic_val == MAGICVALUE_UDP_SYNC_CLIENT){
 
@@ -214,7 +215,7 @@ cipher_decrypt_packet(
 
     p += 4;
 
-    arc4_crypt(&rc4_ctx, sizeof(pad_len), p, (uint8_t*)&pad_len);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(pad_len), p, (uint8_t*)&pad_len);
 
     p++;
 
@@ -238,7 +239,7 @@ cipher_decrypt_packet(
 
       }
 
-      arc4_crypt(&rc4_ctx, pad_len, p, pad_buf);
+      ks->ccbs.arc4_crypt(&rc4_ctx, pad_len, p, pad_buf);
 
       p += pad_len;
 
@@ -254,11 +255,11 @@ cipher_decrypt_packet(
 
     }
 
-    arc4_crypt(&rc4_ctx, sizeof(rcvr_verify_key), p, (uint8_t*)&rcvr_verify_key);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(rcvr_verify_key), p, (uint8_t*)&rcvr_verify_key);
 
     p += 4;
 
-    arc4_crypt(&rc4_ctx, sizeof(sndr_verify_key), p, (uint8_t*)&sndr_verify_key);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(sndr_verify_key), p, (uint8_t*)&sndr_verify_key);
 
     p += 4;
 
@@ -276,7 +277,7 @@ cipher_decrypt_packet(
 
       }
 
-      arc4_crypt(&rc4_ctx, pkt_out_len, p, pkt_out);
+      ks->ccbs.arc4_crypt(&rc4_ctx, pkt_out_len, p, pkt_out);
 
     }
 
@@ -299,6 +300,7 @@ cipher_decrypt_packet(
 
 bool
 cipher_encrypt_packet(
+                      KAD_SESSION* ks,
                       uint8_t* pkt,
                       uint32_t pkt_len,
                       UINT128* id,
@@ -315,7 +317,7 @@ cipher_encrypt_packet(
   uint8_t key_data[18];
   uint8_t key_data_len = 0;
   uint8_t md5_dgst[16];
-  arc4_context rc4_ctx;
+  struct arc4_context rc4_ctx;
   uint8_t semi_rnd_mrkr = 0;
   bool kad_rcvr_key_used = false;
   bool found = false;
@@ -328,6 +330,8 @@ cipher_encrypt_packet(
   do {
 
     if (!pkt || !pkt_len || !pkt_out_ptr || !pkt_out_len_ptr) break;
+
+    if (!ks->ccbs.md5 || !ks->ccbs.arc4_setup || !ks->ccbs.arc4_crypt) break;
 
     memset(key_data, 0, sizeof(key_data));
 
@@ -387,9 +391,9 @@ cipher_encrypt_packet(
 
     }
 
-    md5((uint8_t*)&key_data, key_data_len, md5_dgst);
+    ks->ccbs.md5((uint8_t*)&key_data, key_data_len, md5_dgst);
 
-    arc4_setup(&rc4_ctx, md5_dgst, sizeof(md5_dgst));
+    ks->ccbs.arc4_setup(&rc4_ctx, md5_dgst, sizeof(md5_dgst));
 
     for (i = 0; i < 128; i++){
 
@@ -438,11 +442,11 @@ cipher_encrypt_packet(
 
     magic_val = MAGICVALUE_UDP_SYNC_CLIENT;
 
-    arc4_crypt(&rc4_ctx, sizeof(magic_val), (uint8_t*)&magic_val, p);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(magic_val), (uint8_t*)&magic_val, p);
 
     p += sizeof(magic_val);
 
-    arc4_crypt(&rc4_ctx, sizeof(pad_len), (uint8_t*)&pad_len, p);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(pad_len), (uint8_t*)&pad_len, p);
 
     p += sizeof(pad_len);
 
@@ -450,21 +454,21 @@ cipher_encrypt_packet(
 
       rb = random_uint8();
 
-      arc4_crypt(&rc4_ctx, sizeof(rb), (uint8_t*)&rb, p + i);
+      ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(rb), (uint8_t*)&rb, p + i);
 
     }
 
     p += pad_len;
 
-    arc4_crypt(&rc4_ctx, sizeof(rcvr_verify_key), (uint8_t*)&rcvr_verify_key, p);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(rcvr_verify_key), (uint8_t*)&rcvr_verify_key, p);
 
     p += sizeof(rcvr_verify_key);
 
-    arc4_crypt(&rc4_ctx, sizeof(sndr_verify_key), (uint8_t*)&sndr_verify_key, p);
+    ks->ccbs.arc4_crypt(&rc4_ctx, sizeof(sndr_verify_key), (uint8_t*)&sndr_verify_key, p);
 
     p += sizeof(sndr_verify_key);
 
-    arc4_crypt(&rc4_ctx, pkt_len, pkt, p);
+    ks->ccbs.arc4_crypt(&rc4_ctx, pkt_len, pkt, p);
 
     *pkt_out_ptr = pkt_out;
 
