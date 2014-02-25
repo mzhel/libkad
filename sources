@@ -20,12 +20,7 @@ $LIBKADDIR$/src/comprs.c \
  $LIBKADDIR$/src/uint128.c \
  $LIBKADDIR$/src/random.c \
  $LIBKADDIR$/src/kaddbg.c \
- $LIBKADDIR$/extrn/polarssl/library/havege.c \
- $LIBKADDIR$/extrn/polarssl/library/timing.c \
- $LIBKADDIR$/extrn/polarssl/library/md4.c \
- $LIBKADDIR$/extrn/polarssl/library/md5.c \
- $LIBKADDIR$/extrn/polarssl/library/arc4.c \
- $LIBKADDIR$/extrn/common-code/list.c \
+  $LIBKADDIR$/extrn/common-code/list.c \
  $LIBKADDIR$/extrn/common-code/queue.c \
  $LIBKADDIR$/extrn/common-code/mem.c \
  $LIBKADDIR$/extrn/common-code/log.c \
