@@ -109,7 +109,7 @@ cipher_decrypt_packet(
   uint8_t key_data_len = 0;
   bool rcvr_key_used = false;
   uint8_t md5_dgst[16];
-  struct arc4_context rc4_ctx;
+  arc4_context rc4_ctx;
   uint8_t tries = 2;
   uint32_t magic_val = 0;
   uint8_t* p = NULL;
@@ -317,7 +317,7 @@ cipher_encrypt_packet(
   uint8_t key_data[18];
   uint8_t key_data_len = 0;
   uint8_t md5_dgst[16];
-  struct arc4_context rc4_ctx;
+  arc4_context rc4_ctx;
   uint8_t semi_rnd_mrkr = 0;
   bool kad_rcvr_key_used = false;
   bool found = false;

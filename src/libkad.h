@@ -38,14 +38,25 @@ typedef struct _zlib_callbacks {
   ZLIB_UNCOMPRESS uncompress;
 } ZLIB_CALLBACKS;
 
-typedef struct arc4_context {
+#ifndef CIPHER_CALLBACKS_DEFINED
+#define CIPHER_CALLBACKS_DEFINED
+
+// arc4_context is commented out here
+// because when this header is included in application
+// using this library polarssl headers
+// should be included before this header.
+// Measure is temporary, need to figure out something better.
+
+/*
+typedef struct {
   uint8_t data[512];
-} ARC4_CONTEXT;
+} arc4_context;
+*/
 
 typedef void (*MD4)(const unsigned char *input, size_t ilen, unsigned char output[16]);
-typedef void (*MD5)(const unsigned char *input, size_t, ilen, unsigned char output[16]);
-typedef void (*ARC4_SETUP)(struct arc4_context *ctx, const unsigned char *key, unsigned int keylen);
-typedef int (*ARC4_CRYPT)(struct arc4_context *ctx, size_t length, const unsigned char *input, unsigned char *output);
+typedef void (*MD5)(const unsigned char *input, size_t ilen, unsigned char output[16]);
+typedef void (*ARC4_SETUP)(arc4_context *ctx, const unsigned char *key, unsigned int keylen);
+typedef int (*ARC4_CRYPT)(arc4_context *ctx, size_t length, const unsigned char *input, unsigned char *output);
 
 typedef struct _cipher_callbacks {
   MD4 md4;
@@ -53,6 +64,8 @@ typedef struct _cipher_callbacks {
   ARC4_SETUP arc4_setup;
   ARC4_CRYPT arc4_crypt;
 } CIPHER_CALLBACKS;
+
+#endif
 
 bool
 kad_session_init(
@@ -85,6 +98,12 @@ kadses_set_zlib_callbacks(
                           KAD_SESSION* ks,
                           ZLIB_CALLBACKS* zcbs
                          );
+
+bool
+kadses_set_cipher_callbacks(
+                            KAD_SESSION* ks,
+                            CIPHER_CALLBACKS* ccbs
+                           );
 
 bool
 kad_timer(KAD_SESSION* ks);

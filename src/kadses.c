@@ -291,3 +291,24 @@ kadses_set_zlib_callbacks(
 
   return result;
 }
+
+bool
+kadses_set_cipher_callbacks(
+                            KAD_SESSION* ks,
+                            CIPHER_CALLBACKS* ccbs
+                           )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks || !ccbs) break;
+
+    memcpy(&ks->ccbs, ccbs, sizeof(CIPHER_CALLBACKS));
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
