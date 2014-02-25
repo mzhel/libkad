@@ -811,7 +811,7 @@ kad_get_control_packet_to_send(
 
       LOG_DEBUG("encryption required");
       
-      kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &sndr_verify_key);
+      kadhlp_calc_udp_verify_key(ks, ks->udp_key, qpkt->ip4_no, &sndr_verify_key);
 
       LOG_DEBUG("sndr_verify_key = %.8x", sndr_verify_key);
 
@@ -995,9 +995,7 @@ kad_deq_and_handle_control_packet(
 
     KADDBG_PRINT_PACKET_HEADER(unk_pkt, unk_pkt_len, "received packet header: ");
 
-    // [IMPLEMENT] Here was firewall check start, probably need to stick it somewhere else.
-    
-    kadhlp_calc_udp_verify_key(ks->udp_key, qpkt->ip4_no, &calc_verify_key);
+    kadhlp_calc_udp_verify_key(ks, ks->udp_key, qpkt->ip4_no, &calc_verify_key);
     
     result = kad_handle_control_packet(
                                        ks, 

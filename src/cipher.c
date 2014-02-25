@@ -157,7 +157,7 @@ cipher_decrypt_packet(
 
         rcvr_key_used = true;
 
-        kadhlp_calc_udp_verify_key(self_udp_key, ip4_no, (uint32_t*)key_data);
+        kadhlp_calc_udp_verify_key(ks, self_udp_key, ip4_no, (uint32_t*)key_data);
 
         memcpy(key_data + 4, pkt + 1, 2);
 

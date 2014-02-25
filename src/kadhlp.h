@@ -3,6 +3,7 @@
 
 bool
 kadhlp_id_from_string(
+                      KAD_SESSION* ks,
                       char* str,
                       uint32_t str_len,
                       UINT128* kad_id
@@ -64,6 +65,7 @@ kadhlp_send_fw_check_tcp(
 
 bool
 kadhlp_calc_udp_verify_key(
+                           KAD_SESSION* ks,
                            uint32_t udp_key,
                            uint32_t ip4_no,
                            uint32_t* verify_key_out

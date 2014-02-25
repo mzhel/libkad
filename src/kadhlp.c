@@ -26,11 +26,10 @@
 #include <kaddbg.h>
 #include <mem.h>
 #include <log.h>
-#include <polarssl/md4.h>
-#include <polarssl/md5.h>
 
 bool
 kadhlp_id_from_string(
+                      KAD_SESSION* ks,
                       char* str,
                       uint32_t str_len,
                       UINT128* kad_id
@@ -43,7 +42,9 @@ kadhlp_id_from_string(
 
     if (!str || !str_len || !kad_id) break;
 
-    md4((uint8_t*)str, str_len, dgst);
+    if (!ks->ccbs.md4) break;
+
+    ks->ccbs.md4((uint8_t*)str, str_len, dgst);
 
     uint128_from_buffer(kad_id, dgst, sizeof(dgst), true);
 
@@ -479,6 +480,7 @@ kadhlp_send_fw_check_tcp(
 
 bool
 kadhlp_calc_udp_verify_key(
+                           KAD_SESSION* ks,
                            uint32_t udp_key,
                            uint32_t ip4_no,
                            uint32_t* verify_key_out
@@ -492,7 +494,7 @@ kadhlp_calc_udp_verify_key(
 
   do {
 
-    if (!verify_key_out) break;
+    if (!verify_key_out || !ks->ccbs.md5) break;
 
     memset(dgst, 0, sizeof(dgst));
 
@@ -502,7 +504,7 @@ kadhlp_calc_udp_verify_key(
 
     buf |= ip4_no;
 
-    md5((uint8_t*)&buf, sizeof(buf), dgst);
+    ks->ccbs.md5((uint8_t*)&buf, sizeof(buf), dgst);
 
     p = (uint32_t*)dgst;
 

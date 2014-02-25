@@ -148,7 +148,7 @@ kadses_calc_verify_key(
 
   do {
 
-    result = kadhlp_calc_udp_verify_key(((KAD_SESSION*)ks)->udp_key, ip4_no, key_out);
+    result = kadhlp_calc_udp_verify_key((KAD_SESSION*)ks, ((KAD_SESSION*)ks)->udp_key, ip4_no, key_out);
 
   } while (false);
 

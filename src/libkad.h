@@ -42,11 +42,13 @@ typedef struct arc4_context {
   uint8_t data[512];
 } ARC4_CONTEXT;
 
+typedef void (*MD4)(const unsigned char *input, size_t ilen, unsigned char output[16]);
 typedef void (*MD5)(const unsigned char *input, size_t, ilen, unsigned char output[16]);
 typedef void (*ARC4_SETUP)(struct arc4_context *ctx, const unsigned char *key, unsigned int keylen);
 typedef int (*ARC4_CRYPT)(struct arc4_context *ctx, size_t length, const unsigned char *input, unsigned char *output);
 
 typedef struct _cipher_callbacks {
+  MD4 md4;
   MD5 md5;
   ARC4_SETUP arc4_setup;
   ARC4_CRYPT arc4_crypt;

@@ -787,7 +787,7 @@ search_find_keyword(
 
     }
 
-    kadhlp_id_from_string(keywd, keywd_len, &id_to_find);  
+    kadhlp_id_from_string(ks, keywd, keywd_len, &id_to_find);  
 
     result = kad_search_start(ks, rz, self_id, &id_to_find, kse, kse_lst_ptr);
 
@@ -824,7 +824,7 @@ kad_search_store_keyword(
 
     }
 
-    kadhlp_id_from_string(keywd, keywd_len, &id_to_find);
+    kadhlp_id_from_string(ks, keywd, keywd_len, &id_to_find);
 
     result = kad_search_start(ks, rz, self_id, &id_to_find, kse, kse_lst_ptr);
 
