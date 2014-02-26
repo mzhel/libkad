@@ -644,7 +644,7 @@ kadhlp_create_nodes_dat(
 
       // Ip for udp key 
       
-      kadfile_write_uint32(kf, ntohs(kn->udp_key_ip4_no));
+      kadfile_write_uint32(kf, ntohl(kn->udp_key_ip4_no));
       
       // Ip verified
       
