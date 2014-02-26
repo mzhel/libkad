@@ -53,7 +53,17 @@ typedef struct _kad_session_timers {
   uint32_t done_sources_check;
   uint32_t inacvtive_sources_check;
   uint32_t search_jumpstart;
+  uint32_t update_user_data;
 } KAD_SESSION_TIMERS;
+
+typedef struct _kad_user_data {
+  uint32_t loc_ip4_no;
+  uint32_t pub_ip4_no;
+  uint32_t nodes_count;
+  uint16_t int_udp_port_no;
+  uint16_t ext_udp_port_no;
+  bool tcp_firewalled;
+} KAD_USER_DATA;
 
 typedef struct _kad_session {
   uint32_t version;
@@ -76,6 +86,8 @@ typedef struct _kad_session {
   MULE_CALLBACKS mcbs;
   ZLIB_CALLBACKS zcbs;
   CIPHER_CALLBACKS ccbs;
+  KAD_USER_DATA kud;
+  void* usr_data_lock;
 } KAD_SESSION;
 
 typedef struct _kad_session_status {

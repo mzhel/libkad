@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <uint128.h>
 #include <list.h>
 #include <queue.h>
@@ -23,6 +24,7 @@
 #include <kadpkt.h>
 #include <kadqpkt.h>
 #include <kad.h>
+#include <kadusr.h>
 #include <random.h>
 #include <ticks.h>
 #include <cipher.h>
@@ -267,6 +269,8 @@ kad_session_init(
     queue_create(CONTROL_PACKET_QUEUE_LENGTH, &ks->queue_out_udp);
 
     if (nodes_file_path) kadhlp_add_nodes_from_file(ks, nodes_file_path);
+
+    kadusr_init(ks);
   
     *ks_out = ks;
 
@@ -288,6 +292,8 @@ kad_session_uninit(
   do {
 
     if (!ks) break;
+
+    kadusr_uninit(ks);
 
     if (nodes_file_path) kadses_save_nodes_to_file(ks, nodes_file_path);
 
@@ -336,6 +342,49 @@ kad_session_set_id(
 }
 
 bool
+kad_session_update_user_data(
+                             KAD_SESSION* ks
+                            )
+{
+  bool result = false;
+  uint16_t ext_udp_port = 0;
+
+  do {
+
+    if (!ks) break;
+
+    LOCK_USER_DATA(ks);
+
+    memset(&ks->kud, 0, sizeof(KAD_USER_DATA));
+
+    ks->kud.loc_ip4_no = ks->loc_ip4_no; 
+
+    ks->kud.pub_ip4_no = ks->pub_ip4_no; 
+
+    routing_get_nodes_count(ks->root_zone, &ks->kud.nodes_count, true);
+
+    ks->kud.int_udp_port_no = htons(ks->udp_port); 
+
+    if (kad_fw_extrn_port_valid(&ks->fw)){
+
+      kad_fw_get_extrn_port(&ks->fw, &ext_udp_port);
+
+      ks->kud.ext_udp_port_no = htons(ext_udp_port);
+
+    }
+
+    ks->kud.tcp_firewalled = kad_fw_firewalled(&ks->fw);
+
+    UNLOCK_USER_DATA(ks);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
 kad_session_update(
                    KAD_SESSION* ks,
                    uint32_t now
@@ -366,6 +415,14 @@ kad_session_update(
       kadhlp_send_ping_pkt_to_rand_node(ks);
 
       ks->timers.udp_port_lookup = now + SEC2MS(15);
+
+    }
+
+    if (ks->timers.update_user_data <= now){
+
+      kad_session_update_user_data(ks);
+
+      ks->timers.update_user_data = now + SEC2MS(1);
 
     }
 
@@ -460,6 +517,7 @@ kad_session_update(
 
   return result;
 }
+
 
 bool
 kad_timer(KAD_SESSION* ks)
@@ -1068,6 +1126,25 @@ kad_bootstrap_from_node(
     }
 
     result = true;
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kad_get_user_data(
+                  KAD_SESSION* ks,
+                  KAD_USER_DATA* kud
+                 )
+{
+  bool result = false;
+
+  do {
+
+    if (!ks || !kud) break;
+
+    result = kadusr_get_data(ks, kud);
 
   } while (false);
 

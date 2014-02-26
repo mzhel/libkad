@@ -67,6 +67,15 @@ typedef struct _cipher_callbacks {
 
 #endif
 
+typedef struct _kad_user_data {
+  uint32_t loc_ip4_no;
+  uint32_t pub_ip4_no;
+  uint32_t nodes_count;
+  uint16_t int_udp_port_no;
+  uint16_t ext_udp_port_no;
+  bool tcp_firewalled;
+} KAD_USER_DATA;
+
 bool
 kad_session_init(
                  uint16_t tcp_port,
@@ -138,6 +147,12 @@ kad_bootstrap_from_node(
                         char* node_addr,
                         uint16_t node_port
                         );
+
+bool
+kad_get_user_data(
+                  KAD_SESSION* ks,
+                  KAD_USER_DATA* kud
+                 );
 
 bool
 kadses_get_status(
