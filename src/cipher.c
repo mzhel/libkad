@@ -161,6 +161,8 @@ cipher_decrypt_packet(
 
         memcpy(key_data + 4, pkt + 1, 2);
 
+        LOG_DEBUG("key_data = %.8x%.4x", *(uint32_t*)key_data, *(uint16_t*)(key_data + 4));
+
       } else {
 
         // using node_id
