@@ -26,8 +26,6 @@ kadusr_init(
 
     if (!ks) break;
 
-    INIT_USER_DATA_LOCK(ks);
-
     result = true;
 
   } while (false);
@@ -46,8 +44,6 @@ kadusr_uninit(
 
     if (!ks) break;
 
-    DESTROY_USER_DATA_LOCK(ks);
-
     result = true;
 
   } while (false);
@@ -65,11 +61,7 @@ kadusr_set_local_ip(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.loc_ip4_no = loc_ip4_no;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -88,11 +80,7 @@ kadusr_set_public_ip(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.pub_ip4_no = pub_ip4_no;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -111,11 +99,7 @@ kadusr_set_nodes_count(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.nodes_count = nodes_count;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -134,11 +118,7 @@ kadusr_set_int_udp_port_no(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.int_udp_port_no = int_udp_port_no;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -157,11 +137,7 @@ kadusr_set_ext_udp_port_no(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.ext_udp_port_no = ext_udp_port_no;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -180,11 +156,7 @@ kadusr_set_tcp_firewalled(
 
   do {
 
-    LOCK_USER_DATA(ks);
-
     ks->kud.tcp_firewalled = firewalled;
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 
@@ -205,11 +177,7 @@ kadusr_get_data(
 
     if (!ks || !kud) break;
 
-    LOCK_USER_DATA(ks);
-
     memcpy(kud, &ks->kud, sizeof(KAD_USER_DATA));
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 

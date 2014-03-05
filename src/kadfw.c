@@ -33,6 +33,10 @@ kad_fw_init(
     if (!kfw) break;
 
     // [LOCK] initialize nodes and used nodes lock.
+    
+    kfw->udp_firewalled = true;
+
+    kfw->firewalled = true;
 
     result = true;
 

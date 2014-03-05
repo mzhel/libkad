@@ -22,8 +22,8 @@ KEYS= -shared
 TARGETNAME=libkad.a
 TARGETDIR=./bin/
 [Deployer]
-./bin/libkad.a=../kad/lib/libkad.a
-./src/libkad.h=../kad/src/libkad/libkad.h
+./bin/libkad.a=../kad/lib/libkad.a,../wxkad/lib/libkad.a
+./src/libkad.h=../kad/src/libkad/libkad.h,../wxkad/src/libkad/libkad.h
 [Cleaner]
 DIRS=./;./obj/;./bin/
 EXTS=*.o;*.dat;*.a

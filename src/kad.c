@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <bits/local_lim.h>
 #include <memory.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -184,6 +186,7 @@ kad_session_init(
 {
   bool result = false;
   KAD_SESSION* ks = NULL;
+  char host_name[HOST_NAME_MAX + 1];
   struct hostent* he = NULL;
   UINT128 zone_idx;
   uint32_t now = 0;
@@ -214,7 +217,11 @@ kad_session_init(
 
     random_init(ticks_now_ms());
 
-    he = gethostbyname("localhost");
+    gethostname(host_name, HOST_NAME_MAX);
+
+    LOG_DEBUG("Host name: %s", host_name);
+
+    he = gethostbyname(host_name);
 
     ks->loc_ip4_no = *(uint32_t*)he->h_addr;
 
@@ -353,8 +360,6 @@ kad_session_update_user_data(
 
     if (!ks) break;
 
-    LOCK_USER_DATA(ks);
-
     memset(&ks->kud, 0, sizeof(KAD_USER_DATA));
 
     ks->kud.loc_ip4_no = ks->loc_ip4_no; 
@@ -362,6 +367,8 @@ kad_session_update_user_data(
     ks->kud.pub_ip4_no = ks->pub_ip4_no; 
 
     routing_get_nodes_count(ks->root_zone, &ks->kud.nodes_count, true);
+
+    ks->kud.tcp_port_no = htons(ks->tcp_port);
 
     ks->kud.int_udp_port_no = htons(ks->udp_port); 
 
@@ -374,8 +381,6 @@ kad_session_update_user_data(
     }
 
     ks->kud.tcp_firewalled = kad_fw_firewalled(&ks->fw);
-
-    UNLOCK_USER_DATA(ks);
 
     result = true;
 

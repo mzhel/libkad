@@ -53,12 +53,4 @@ kadusr_get_data(
                 KAD_USER_DATA* kud
                );
 
-#define INIT_USER_DATA_LOCK(ks) pthread_mutex_init((pthread_mutex_t*)ks->usr_data_lock, NULL);
-
-#define DESTROY_USER_DATA_LOCK(ks) pthread_mutex_destroy((pthread_mutex_t*)ks->usr_data_lock);
-
-#define LOCK_USER_DATA(ks) pthread_mutex_lock((pthread_mutex_t*)ks->usr_data_lock)
-
-#define UNLOCK_USER_DATA(ks) pthread_mutex_unlock((pthread_mutex_t*)ks->usr_data_lock)
-
 #endif // _KADUSR_H_
