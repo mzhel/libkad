@@ -35,6 +35,8 @@
 
 #define ALPHA_QUERY 3
 
+typedef void (*KAD_SEARCH_RESULT_KEYWORD_CB)(void* arg, uint32_t search_id, char* file_name, uint64_t file_size, char* file_type, uint64_t length);
+
 typedef struct _search_keyword_result {
   UINT128 id;
   char* file_name;
@@ -87,6 +89,8 @@ typedef struct kad_search {
   LIST* file_results;
   char* file_name;
   uint64_t file_size;
+  void* kw_res_cb_arg;
+  KAD_SEARCH_RESULT_KEYWORD_CB kw_res_cb;
 } KAD_SEARCH;
 
 #define SEARCH_LOCK(kse)
@@ -200,14 +204,17 @@ kad_search_add_terms(
                     );
 
 bool
-search_find_keyword(
-                    KAD_SESSION* ks,
-                    ROUTING_ZONE* rz,
-                    UINT128* self_id,
-                    char* keywd,
-                    uint32_t keywd_len,
-                    LIST** kse_lst_ptr
-                    );
+kad_search_find_keyword(
+                        KAD_SESSION* ks,
+                        ROUTING_ZONE* rz,
+                        UINT128* self_id,
+                        char* keywd,
+                        uint32_t keywd_len,
+                        LIST** kse_lst_ptr,
+                        void* res_cb_arg,
+                        KAD_SEARCH_RESULT_KEYWORD_CB res_cb
+
+                        );
 
 bool
 kad_search_store_keyword(

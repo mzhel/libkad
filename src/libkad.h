@@ -75,7 +75,11 @@ typedef struct _kad_user_data {
   uint16_t int_udp_port_no;
   uint16_t ext_udp_port_no;
   bool tcp_firewalled;
+  bool udp_firewalled;
 } KAD_USER_DATA;
+
+
+typedef void (*KAD_SEARCH_RESULT_KEYWORD_CB)(void* arg, uint32_t search_id, char* file_name, uint64_t file_size, char* file_type, uint64_t length);
 
 bool
 kad_session_init(
@@ -160,6 +164,14 @@ kadses_get_status(
                   void* ks,
                   KAD_SESSION_STATUS* kss
                  );
+
+bool
+kad_search_keyword(
+                   KAD_SESSION* ks,
+                   char* keyword,
+                   void* res_cb_arg,
+                   KAD_SEARCH_RESULT_KEYWORD_CB res_cb
+                  );
 
 bool
 kadses_calc_verify_key(

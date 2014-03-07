@@ -326,6 +326,8 @@ kadses_save_nodes_to_file(
 
     if (!ks || !file_path) break;
 
+    LOG_DEBUG("Saving nodes to file %s", file_path);
+
     if (!routing_get_nodes_list(ks->root_zone, &kn_lst)){
 
       LOG_ERROR("Failed to get nodes list.");

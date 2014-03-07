@@ -34,7 +34,7 @@ compress_is_packet_compressed(
 
     proto = pkt[0];
 
-    if (!proto != OP_KADEMLIAPACKEDPROT) break;
+    if (proto != OP_KADEMLIAPACKEDPROT) break;
 
     result = true;
 

@@ -382,6 +382,8 @@ kad_session_update_user_data(
 
     ks->kud.tcp_firewalled = kad_fw_firewalled(&ks->fw);
 
+    ks->kud.udp_firewalled = kad_fw_firewalled_udp(&ks->fw);
+
     result = true;
 
   } while (false);
@@ -1150,6 +1152,36 @@ kad_get_user_data(
     if (!ks || !kud) break;
 
     result = kadusr_get_data(ks, kud);
+
+  } while (false);
+
+  return result;
+}
+
+bool
+kad_search_keyword(
+                   KAD_SESSION* ks,
+                   char* keyword,
+                   void* res_cb_arg,
+                   KAD_SEARCH_RESULT_KEYWORD_CB res_cb
+                  )
+{
+  bool result = false;
+
+  do {
+
+    kad_search_find_keyword(
+                            ks,
+                            ks->root_zone,
+                            &ks->kad_id,
+                            keyword,
+                            strlen(keyword),
+                            &ks->searches,
+                            res_cb_arg,
+                            res_cb
+                           );
+
+    result = true;
 
   } while (false);
 

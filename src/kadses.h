@@ -64,6 +64,7 @@ typedef struct _kad_user_data {
   uint16_t int_udp_port_no;
   uint16_t ext_udp_port_no;
   bool tcp_firewalled;
+  bool udp_firewalled;
 } KAD_USER_DATA;
 
 typedef struct _kad_session {

@@ -742,6 +742,8 @@ kad_search_add_terms(
 
     *((uint16_t*)(st + 1)) = (uint16_t)keywd_len;
 
+    memcpy(st + 3, keywd, keywd_len);
+
     kse->search_terms_data = st;
 
     kse->search_terms_data_len = st_len;
@@ -754,14 +756,16 @@ kad_search_add_terms(
 }
 
 bool
-search_find_keyword(
-                    KAD_SESSION* ks,
-                    ROUTING_ZONE* rz,
-                    UINT128* self_id,
-                    char* keywd,
-                    uint32_t keywd_len,
-                    LIST** kse_lst_ptr
-                    )
+kad_search_find_keyword(
+                        KAD_SESSION* ks,
+                        ROUTING_ZONE* rz,
+                        UINT128* self_id,
+                        char* keywd,
+                        uint32_t keywd_len,
+                        LIST** kse_lst_ptr,
+                        void* res_cb_arg,
+                        KAD_SEARCH_RESULT_KEYWORD_CB res_cb
+                       )
 {
   bool result = false;
   KAD_SEARCH* kse = NULL;
@@ -779,6 +783,10 @@ search_find_keyword(
 
     }
 
+    kse->kw_res_cb_arg = res_cb_arg;
+
+    kse->kw_res_cb = res_cb;
+
     if (!kad_search_add_terms(kse, keywd, keywd_len)){
 
       LOG_ERROR("Failed to add terms to search.");
@@ -787,7 +795,11 @@ search_find_keyword(
 
     }
 
-    kadhlp_id_from_string(ks, keywd, keywd_len, &id_to_find);  
+    kadhlp_id_from_string(ks, keywd, keywd_len, &id_to_find);
+
+    LOG_DEBUG("(%d) Starting search for keyword \"%s\"", kse->id, keywd);
+
+    LOG_DEBUG_UINT128("Id from keyword:", ((UINT128*)&id_to_find)); 
 
     result = kad_search_start(ks, rz, self_id, &id_to_find, kse, kse_lst_ptr);
 
@@ -1161,13 +1173,17 @@ kad_search_process_last_node_response(
 
       case SEARCH_KEYWORD:
 
-        if (kadpkt_create_search_key_req(
-                                         &kse->target_id,
-                                         kse->search_terms_data,
-                                         kse->search_terms_data_len,
-                                         &pkt,
-                                         &pkt_len
-                                         )
+        LOG_DEBUG("Creating search keyword request.");
+
+        LOG_DEBUG_UINT128("Node id:", ((UINT128*)&kn->id));
+
+        if (!kadpkt_create_search_key_req(
+                                          &kse->target_id,
+                                          kse->search_terms_data,
+                                          kse->search_terms_data_len,
+                                          &pkt,
+                                          &pkt_len
+                                          )
         ){
 
           LOG_ERROR("(%d) Failed to create search key request.", kse->id);
@@ -1184,7 +1200,7 @@ kad_search_process_last_node_response(
 
         }
 
-        if (kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
+        if (!kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
 
           LOG_ERROR("(%d) Failed to queue search request packet.", kse->id);
 
@@ -1251,7 +1267,7 @@ kad_search_process_last_node_response(
 
   } while (false);
 
-  if (pkt_queued && pkt) mem_free(pkt);
+  if (!pkt_queued && pkt) mem_free(pkt);
 
   return result;
 }
@@ -1554,10 +1570,27 @@ kad_search_jumpstart_all(
 
       LIST_EACH_ENTRY_WITH_DATA_BEGIN(kse->keywd_results, e, kwd_res);
 
-        // [IMPLEMENT] Handle keyword results
+        if (kse->kw_res_cb) kse->kw_res_cb(
+                                           kse->kw_res_cb_arg,
+                                           kse->id, 
+                                           kwd_res->file_name, 
+                                           kwd_res->file_size,
+                                           kwd_res->file_type,
+                                           kwd_res->length
+                                          );
 
       LIST_EACH_ENTRY_WITH_DATA_END(e);
 
+      // Empty result for last entry
+
+       if (kse->keywd_results && kse->kw_res_cb) kse->kw_res_cb(
+                                                                kse->kw_res_cb_arg,
+                                                                0, 
+                                                                NULL, 
+                                                                0,
+                                                                NULL,
+                                                                0
+                                                               );
       // [IMPLEMENT] file results handling
       
       kad_search_destroy(kse);
@@ -1605,7 +1638,7 @@ kad_search_add_keyword_result(
 
     kwd_res = (SEARCH_KEYWORD_RESULT*)mem_alloc(kwd_res_len);
 
-    if (kwd_res){
+    if (!kwd_res){
 
       LOG_ERROR("Failed to allocate memory for keyword result.");
 
@@ -2118,6 +2151,8 @@ kad_search_process_result(
     ONGOING_SEARCHES_LOCK(ks);
 
     locked = true;
+
+    LOG_DEBUG_UINT128("Search result for target id:", trgt_id);
 
     if (!kad_search_find_by_target(trgt_id, ks->searches, &kse)){
 

@@ -734,7 +734,7 @@ kadproto_kademlia2_search_res(
 
     rem_len -= sizeof(UINT128);
 
-    // Searhc key hash
+    // Search key hash
     
     uint128_from_buffer(&srch_key, p, rem_len, false);
         
