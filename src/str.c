@@ -130,6 +130,8 @@ str_utf8_to_utf8(
 
     memcpy(out_buf, in_str, copy_len);
 
+    if (read_len_out) *read_len_out = in_str_len;
+
     result = true;
 
   } while (false);
