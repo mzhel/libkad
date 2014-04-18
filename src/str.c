@@ -110,6 +110,30 @@ str_utf8_to_unicode(
   return result;
 }
 
+bool
+str_utf8_to_utf8(
+                 char* in_str,
+                 size_t in_str_len,
+                 char* out_buf,
+                 size_t out_buf_len,
+                 uint32_t* read_len_out 
+                )
+{
+  bool result = false;
+
+  do {
+
+    if (!in_str || !out_buf) break;
+
+    memcpy(out_buf, in_str, in_str_len);
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}
+
 uint32_t
 str_wide_len(
              wchar_t* str

@@ -19,6 +19,15 @@ str_utf8_to_unicode(
                     uint32_t* read_len_out
                    );
 
+bool
+str_utf8_to_utf8(
+                 char* in_str,
+                 size_t in_str_len,
+                 char* out_buf,
+                 size_t out_buf_len,
+                 uint32_t* read_len_out 
+                );
+
 uint32_t
 str_wide_len(
              wchar_t* str
