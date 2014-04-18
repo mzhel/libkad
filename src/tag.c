@@ -619,6 +619,8 @@ tag_read(
 
       case TAGTYPE_STRING:
 
+        // Bytes count in utf-8 encoded string
+
         *(uint16_t*)pout = *(uint16_t*)p;
 
         str_utf8_to_unicode(

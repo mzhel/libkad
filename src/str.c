@@ -87,7 +87,7 @@ str_utf8_to_unicode(
 
     }
 
-    out_buf_len = out_buf_len *sizeof(wchar_t);
+    out_buf_len = out_buf_len * sizeof(wchar_t);
 
     out_buf_len_base = out_buf_len;
 

@@ -87,6 +87,8 @@
 
 #define TAG_NAME_ID_FLAG  0x80
 
+#define TAG_STR_BOM_HEADER_PRESENT(size, x) ((size >= 3) && (x[0] == (char)0xef) && (x[1] == (char)0xbb) && (x[2] == (char)0xbf))
+
 typedef struct _tag_string {
   uint16_t len;
   wchar_t data[1];

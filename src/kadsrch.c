@@ -1850,6 +1850,7 @@ kad_search_process_result_keyword(
   uint64_t pub_info = 0;
   uint64_t file_size = 0;
   uint32_t len = 0;
+  uint32_t buf_len = 0;
 
   do {
 
@@ -1869,7 +1870,7 @@ kad_search_process_result_keyword(
 
     }
 
-    file_type_len = 0;
+    file_type_len = 16;
 
     file_type = (char*)mem_alloc(file_type_len);
 
@@ -1921,11 +1922,15 @@ kad_search_process_result_keyword(
 
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_name, file_name_len, len);
+        MEM_ADJUST_BUFFER(file_name, file_name_len, len + 1);
 
-        memset(file_name, 0, file_name_len);
+        buf_len = (file_name_len > (len + 1))?file_name_len:(len + 1);
 
-        tag_string_get_data(tag, (uint8_t*)file_name, file_name_len);
+        memset(file_name, 0, buf_len);
+
+        tag_string_get_data(tag, (uint8_t*)file_name, buf_len);
+
+        LOG_DEBUG("tag_filename = %s, tag_len = %d", file_name, len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_FILESIZE)){
 
@@ -1949,21 +1954,27 @@ kad_search_process_result_keyword(
 
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_type, file_type_len, len);
+        MEM_ADJUST_BUFFER(file_type, file_type_len, len + 1);
 
-        memset(file_type, 0, file_type_len);
+        buf_len = (file_type_len > (len + 1))?file_type_len:(len + 1);
 
-        tag_string_get_data(tag, (uint8_t*)file_type, file_type_len);
+        memset(file_type, 0, buf_len);
+
+        tag_string_get_data(tag, (uint8_t*)file_type, buf_len);
+
+        LOG_DEBUG("file_type = %s, tag_len = %d", file_type, len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_FILEFORMAT)){
 
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_fmt, file_fmt_len, len);
+        MEM_ADJUST_BUFFER(file_fmt, file_fmt_len, len + 1);
 
-        memset(file_fmt, 0, file_fmt_len);
+        buf_len = (file_fmt_len > (len + 1))?file_fmt_len:(len + 1);
 
-        tag_string_get_data(tag, (uint8_t*)file_fmt, file_fmt_len);
+        memset(file_type, 0, buf_len);
+
+        tag_string_get_data(tag, (uint8_t*)file_fmt, buf_len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_MEDIA_ARTIST)) {
 
