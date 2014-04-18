@@ -1583,14 +1583,15 @@ kad_search_jumpstart_all(
 
       // Empty result for last entry
 
-       if (kse->keywd_results && kse->kw_res_cb) kse->kw_res_cb(
-                                                                kse->kw_res_cb_arg,
-                                                                0, 
-                                                                NULL, 
-                                                                0,
-                                                                NULL,
-                                                                0
-                                                               );
+       if (kse->type == SEARCH_KEYWORD && kse->kw_res_cb) kse->kw_res_cb(
+                                                                         kse->kw_res_cb_arg,
+                                                                         0, 
+                                                                         NULL, 
+                                                                         0,
+                                                                         NULL,
+                                                                         0
+                                                                        );
+
       // [IMPLEMENT] file results handling
       
       kad_search_destroy(kse);
