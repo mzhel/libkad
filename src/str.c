@@ -120,12 +120,15 @@ str_utf8_to_utf8(
                 )
 {
   bool result = false;
+  uint32_t copy_len = 0;
 
   do {
 
     if (!in_str || !out_buf) break;
 
-    memcpy(out_buf, in_str, in_str_len);
+    copy_len = in_str_len > out_buf_len?out_buf_len:in_str_len;
+
+    memcpy(out_buf, in_str, copy_len);
 
     result = true;
 
