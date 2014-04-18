@@ -1859,7 +1859,7 @@ kad_search_process_result_keyword(
 
     kse->answers++;
 
-    file_name_len = 256;
+    file_name_len = 512;
 
     file_name = (char*)mem_alloc(file_name_len);
 
@@ -1883,7 +1883,7 @@ kad_search_process_result_keyword(
 
     }
 
-    file_fmt_len = 32;
+    file_fmt_len = 128;
 
     file_fmt = (char*)mem_alloc(file_fmt_len);
 
@@ -1921,19 +1921,23 @@ kad_search_process_result_keyword(
 
       if (0 == str_wide_cmp(tag_name, TAG_FILENAME)){
 
+        LOG_DEBUG("TAG_FILENAME");
+
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_name, file_name_len, len + 1);
+        //MEM_ADJUST_BUFFER(file_name, file_name_len, len + 1);
 
-        buf_len = (file_name_len > (len + 1))?file_name_len:(len + 1);
+        //buf_len = (file_name_len > (len + 1))?file_name_len:(len + 1);
 
-        memset(file_name, 0, buf_len);
+        memset(file_name, 0, file_name_len);
 
-        tag_string_get_data(tag, (uint8_t*)file_name, buf_len);
+        tag_string_get_data(tag, (uint8_t*)file_name, file_name_len - 1);
 
-        LOG_DEBUG("tag_filename = %s, tag_len = %d", file_name, len);
+        LOG_DEBUG("tag_filename = %s, tag_len = %d, buf_len = %d", file_name, len, file_name_len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_FILESIZE)){
+
+        LOG_DEBUG("TAG_FILESIZE");
 
         if (tag_is_bsob(tag)){
 
@@ -1953,29 +1957,35 @@ kad_search_process_result_keyword(
 
       } else if (0 == str_wide_cmp(tag_name, TAG_FILETYPE)){
 
+        LOG_DEBUG("TAG_FILETYPE");
+
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_type, file_type_len, len + 1);
+        //MEM_ADJUST_BUFFER(file_type, file_type_len, len + 1);
 
-        buf_len = (file_type_len > (len + 1))?file_type_len:(len + 1);
+        //buf_len = (file_type_len > (len + 1))?file_type_len:(len + 1);
 
-        memset(file_type, 0, buf_len);
+        memset(file_type, 0, file_type_len);
 
-        tag_string_get_data(tag, (uint8_t*)file_type, buf_len);
+        tag_string_get_data(tag, (uint8_t*)file_type, file_type_len - 1);
 
-        LOG_DEBUG("file_type = %s, tag_len = %d", file_type, len);
+        LOG_DEBUG("file_type = %s, tag_len = %d, buf_len = %d", file_type, len, file_type_len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_FILEFORMAT)){
 
+        LOG_DEBUG("TAG_FILEFORMAT");
+
         tag_string_get_len(tag, &len);
 
-        MEM_ADJUST_BUFFER(file_fmt, file_fmt_len, len + 1);
+        //MEM_ADJUST_BUFFER(file_fmt, file_fmt_len, len + 1);
 
-        buf_len = (file_fmt_len > (len + 1))?file_fmt_len:(len + 1);
+        //buf_len = (file_fmt_len > (len + 1))?file_fmt_len:(len + 1);
 
-        memset(file_type, 0, buf_len);
+        memset(file_fmt, 0, file_fmt_len);
 
-        tag_string_get_data(tag, (uint8_t*)file_fmt, buf_len);
+        tag_string_get_data(tag, (uint8_t*)file_fmt, file_fmt_len - 1);
+
+        LOG_DEBUG("file_fmt = %s, tag_len = %d, buf_len = %d", file_fmt, len, file_fmt_len);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_MEDIA_ARTIST)) {
 
@@ -1991,15 +2001,21 @@ kad_search_process_result_keyword(
 
       } else if (0 == str_wide_cmp(tag_name, TAG_SOURCES)) {
 
+        LOG_DEBUG("TAG_SOURCES");
+
         tag_get_integer(tag, &avail);
 
       } else if (0 == str_wide_cmp(tag_name, TAG_PUBLISHINFO)) {
 
+        LOG_DEBUG("TAG_PUBLISHINFO");
+        
         tag_get_integer(tag, &pub_info);
 
       }
 
     LIST_EACH_ENTRY_WITH_DATA_END(e);
+
+    LOG_DEBUG("Tag enumeration finished.");
 
     kad_search_add_keyword_result(kse, answer, file_name, file_size, file_type, file_fmt, (uint16_t)avail, (uint32_t)pub_info);
 
