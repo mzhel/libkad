@@ -79,7 +79,9 @@ typedef struct _kad_user_data {
 } KAD_USER_DATA;
 
 
-typedef void (*KAD_SEARCH_RESULT_KEYWORD_CB)(void* arg, uint32_t search_id, char* file_name, uint64_t file_size, char* file_type, uint64_t length);
+typedef void (*KAD_SEARCH_RESULT_KEYWORD_CB)(void* arg, uint32_t search_id, void* file_id, char* file_name, uint64_t file_size, char* file_type, uint64_t length, uint16_t avail);
+
+typedef void (*KAD_SEARCH_RESULT_FILE_CB)(void* arg, char* file_name, uint64_t file_size, uint8_t type, void* id, uint32_t ip4, uint16_t tcp_port, uint16_t udp_port, uint8_t cipher_opts);
 
 bool
 kad_session_init(
@@ -172,6 +174,16 @@ kad_search_keyword(
                    void* res_cb_arg,
                    KAD_SEARCH_RESULT_KEYWORD_CB res_cb
                   );
+
+bool
+kad_search_file(
+                KAD_SESSION* ks,
+                void* file_id,
+                char* file_name,
+                uint64_t file_size,
+                void* res_cb_arg,
+                KAD_SEARCH_RESULT_FILE_CB res_cb
+               );
 
 bool
 kadses_calc_verify_key(

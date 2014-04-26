@@ -1187,3 +1187,40 @@ kad_search_keyword(
 
   return result;
 }
+
+bool
+kad_search_file(
+                KAD_SESSION* ks,
+                void* file_id,
+                char* file_name,
+                uint64_t file_size,
+                void* res_cb_arg,
+                KAD_SEARCH_RESULT_FILE_CB res_cb
+               )
+{
+  bool result = false;
+
+  do {
+
+    LOG_DEBUG("Starting search for file \"%s\"", file_name);
+
+    LOG_DEBUG_UINT128("file_id = ", ((UINT128*)file_id));
+
+    kad_search_find_file(
+                         ks,
+                         ks->root_zone,
+                         &ks->kad_id,
+                         (UINT128*)file_id,
+                         file_name,
+                         file_size,
+                         &ks->searches,
+                         res_cb_arg,
+                         res_cb
+                        );    
+
+    result = true;
+
+  } while (false);
+
+  return result;
+}

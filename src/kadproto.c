@@ -758,6 +758,8 @@ kadproto_kademlia2_search_res(
 
       p += sizeof(UINT128);
 
+      LOG_DEBUG_UINT128("answ_id: ", ((UINT128*)&answ_id));
+
       rem_len -= sizeof(UINT128);
 
       // Tags in answer

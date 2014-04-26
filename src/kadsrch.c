@@ -884,7 +884,9 @@ kad_search_find_file(
                      UINT128* file_id,
                      char* file_name,
                      uint64_t file_size,
-                     LIST** kse_lst_ptr
+                     LIST** kse_lst_ptr,
+                     void* res_cb_arg,
+                     KAD_SEARCH_RESULT_FILE_CB res_cb
                     )
 {
   bool result = false;
@@ -894,6 +896,7 @@ kad_search_find_file(
 
     if (!ks || !rz || !self_id || !file_id || !file_name || !file_size || !kse_lst_ptr) break;
 
+
     if (!kad_search_create(SEARCH_FILE, &kse)){
 
       LOG_ERROR("Failed to create search.");
@@ -901,6 +904,10 @@ kad_search_find_file(
       break;
 
     }
+
+    kse->file_res_cb = res_cb;
+
+    kse->file_res_cb_arg = res_cb_arg;
 
     kse->file_size = file_size;
 
@@ -1214,6 +1221,8 @@ kad_search_process_last_node_response(
 
       case SEARCH_FILE:
 
+        LOG_DEBUG("(%d) SEARCH_FILE, creating search source req.", kse->id);
+
         if (!kadpkt_create_search_source_req(
                                              &kse->target_id,
                                              kse->file_size,
@@ -1236,7 +1245,7 @@ kad_search_process_last_node_response(
 
         }
 
-        if (kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
+        if (!kadses_create_queue_udp_pkt(ks, kn->ip4_no, kn->udp_port_no, cli_id, cli_key, pkt, pkt_len)){
 
           LOG_ERROR("(%d) Failed to queue search source request packet.");
 
@@ -1244,7 +1253,7 @@ kad_search_process_last_node_response(
 
         }
 
-        pkt_queued = false;
+        pkt_queued = true;
 
       break;
 
@@ -1414,6 +1423,7 @@ kad_search_jumpstart_all(
   LIST* kse_exp_lst = NULL;
   uint32_t now;
   SEARCH_KEYWORD_RESULT* kwd_res = NULL;
+  SEARCH_FILE_RESULT* file_res = NULL;
 
   do {
 
@@ -1573,10 +1583,12 @@ kad_search_jumpstart_all(
         if (kse->kw_res_cb) kse->kw_res_cb(
                                            kse->kw_res_cb_arg,
                                            kse->id, 
+                                           &kwd_res->id,
                                            kwd_res->file_name, 
                                            kwd_res->file_size,
                                            kwd_res->file_type,
-                                           kwd_res->length
+                                           kwd_res->length,
+                                           kwd_res->avail
                                           );
 
       LIST_EACH_ENTRY_WITH_DATA_END(e);
@@ -1586,14 +1598,44 @@ kad_search_jumpstart_all(
        if (kse->type == SEARCH_KEYWORD && kse->kw_res_cb) kse->kw_res_cb(
                                                                          kse->kw_res_cb_arg,
                                                                          0, 
+                                                                         NULL,
                                                                          NULL, 
                                                                          0,
                                                                          NULL,
+                                                                         0,
                                                                          0
                                                                         );
 
-      // [IMPLEMENT] file results handling
-      
+      LIST_EACH_ENTRY_WITH_DATA_BEGIN(kse->file_results, e, file_res);
+
+        if (kse->file_res_cb) kse->file_res_cb(
+                                               kse->file_res_cb_arg,
+                                               kse->file_name,
+                                               kse->file_size,
+                                               file_res->type,
+                                               &file_res->id,
+                                               file_res->ip4,
+                                               file_res->tcp_port,
+                                               file_res->udp_port,
+                                               file_res->cipher_opts
+                                              );
+
+      LIST_EACH_ENTRY_WITH_DATA_END(e);
+
+      // Empty result for last entry
+
+      if (kse->type == SEARCH_FILE && kse->file_res_cb) kse->file_res_cb(
+                                                                         kse->file_res_cb_arg,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0
+                                                                        );
+
       kad_search_destroy(kse);
 
     LIST_EACH_ENTRY_WITH_DATA_END(e);
@@ -1775,6 +1817,8 @@ kad_search_add_file_result(
   do {
 
     if (!kse) break;
+
+    LOG_DEBUG_UINT128("File result for id: ", id);
 
     file_res = (SEARCH_FILE_RESULT*)mem_alloc(sizeof(SEARCH_FILE_RESULT));
 
@@ -2063,7 +2107,7 @@ kad_search_process_result_file(
 
     kse->answers++;
 
-    tag_name_len = 128;
+    tag_name_len = 256;
 
     tag_name = (wchar_t*)mem_alloc(tag_name_len * sizeof(wchar_t));
 
@@ -2085,6 +2129,8 @@ kad_search_process_result_file(
 
       }
 
+      memset(tag_name, 0, tag_name_len);
+
       tag_get_name(tag, tag_name, tag_name_len);
 
       if (!str_wide_cmp(tag_name, TAG_SOURCETYPE)){
@@ -2095,6 +2141,8 @@ kad_search_process_result_file(
 
         }
 
+        LOG_DEBUG("TAG_SOURCETYPE %.2x", type);
+
       } else if (!str_wide_cmp(tag_name, TAG_SOURCEIP)){
 
         if (tag_get_integer(tag, &val)){
@@ -2102,6 +2150,8 @@ kad_search_process_result_file(
           ip4 = (uint32_t)val;
 
         }
+
+        LOG_DEBUG("TAG_SOURCEIP %.8x", ip4);
 
       } else if (!str_wide_cmp(tag_name, TAG_SOURCEPORT)){
 
@@ -2111,6 +2161,8 @@ kad_search_process_result_file(
 
         }
 
+        LOG_DEBUG("TAG_SOURCEPORT %.4x", tcp_port);
+
       } else if (!str_wide_cmp(tag_name, TAG_SOURCEUPORT)){
 
         if (!tag_get_integer(tag, &val)){
@@ -2118,6 +2170,8 @@ kad_search_process_result_file(
           udp_port = (uint16_t)val;
 
         }
+
+        LOG_DEBUG("TAG_SOURCEUPORT %.4x", udp_port);
 
       } else if (!str_wide_cmp(tag_name, TAG_SERVERIP)){
 
@@ -2127,6 +2181,8 @@ kad_search_process_result_file(
 
         }
 
+        LOG_DEBUG("TAG_SERVERIP %.8x", buddy_ip4);
+
       } else if (!str_wide_cmp(tag_name, TAG_SERVERPORT)){
 
         if (tag_get_integer(tag, &val)){
@@ -2134,6 +2190,8 @@ kad_search_process_result_file(
           buddy_port = (uint16_t)val;
 
         }
+
+        LOG_DEBUG("TAG_SERVERPORT %.4x", buddy_port);
 
       } else if (!str_wide_cmp(tag_name, TAG_BUDDYHASH)){
 
@@ -2147,6 +2205,8 @@ kad_search_process_result_file(
 
         }
 
+        LOG_DEBUG("TAG_ENCRYPTION %.2x", crypt_opts);
+
       }
 
     LIST_EACH_ENTRY_WITH_DATA_END(e);
@@ -2156,6 +2216,8 @@ kad_search_process_result_file(
     result = true;
 
   } while (false);
+
+  if (tag_name) mem_free(tag_name);
 
   return result;
 }
