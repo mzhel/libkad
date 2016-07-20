@@ -17,26 +17,15 @@ typedef struct _kad_session_status {
 #ifndef MULE_SESSION_DEFINED
 #define MULE_SESSION_DEFINED
 
+typedef struct _uint128 UINT128;
+
+typedef struct mule_file MULE_FILE;
+
 typedef struct _mule_session MULE_SESSION;
 
 #endif 
 
 typedef struct _kad_session KAD_SESSION;
-
-typedef bool (*MULE_ADD_SOURCE_FOR_UDP_FW_CHECK)(MULE_SESSION* ms, void* id, uint32_t ip4_no, uint16_t tcp_port_no, uint16_t udp_port_no);
-
-typedef bool (*MULE_ADD_SOURCE_FOR_TCP_FW_CHECK)(MULE_SESSION* ms, void* id, uint32_t ip4_no, uint16_t tcp_port_no, uint16_t udp_port_no);
-
-typedef struct _mule_callbacks {
-  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_udp_fw_check;
-  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
-} MULE_CALLBACKS;
-
-typedef int (*ZLIB_UNCOMPRESS)(unsigned char * dest, unsigned long * dest_len_ptr, const unsigned char * src, unsigned long src_len);
-
-typedef struct _zlib_callbacks {
-  ZLIB_UNCOMPRESS uncompress;
-} ZLIB_CALLBACKS;
 
 #ifndef CIPHER_CALLBACKS_DEFINED
 #define CIPHER_CALLBACKS_DEFINED
@@ -66,6 +55,31 @@ typedef struct _cipher_callbacks {
 } CIPHER_CALLBACKS;
 
 #endif
+
+typedef bool (*MULE_ADD_SOURCE_FOR_UDP_FW_CHECK)(MULE_SESSION* ms, void* id, uint32_t ip4_no, uint16_t tcp_port_no, uint16_t udp_port_no);
+
+typedef bool (*MULE_ADD_SOURCE_FOR_TCP_FW_CHECK)(MULE_SESSION* ms, void* id, uint32_t ip4_no, uint16_t tcp_port_no, uint16_t udp_port_no);
+
+typedef bool (*MULE_SESSION_CREATE_FILE)(UINT128* id, char* name, char* path, uint8_t* data, uint64_t size, CIPHER_CALLBACKS* ccbs, MULE_FILE** mf_out);
+
+typedef bool (*MULE_SESSION_ADD_SOURCE_TO_FILE)(MULE_FILE* mf, uint8_t type, UINT128* id, uint32_t ip4_no, uint16_t tcp_port_no, uint16_t udp_port_no, uint8_t cipher_opts);
+
+typedef bool (*MULE_SESSION_ADD_PUB_FILE)(MULE_SESSION* ms, MULE_FILE* mf);
+
+typedef struct _mule_callbacks {
+  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_udp_fw_check;
+  MULE_ADD_SOURCE_FOR_UDP_FW_CHECK add_source_for_tcp_fw_check;
+  MULE_SESSION_CREATE_FILE session_create_file;
+  MULE_SESSION_ADD_SOURCE_TO_FILE session_add_source_to_file;
+  MULE_SESSION_ADD_PUB_FILE session_add_pub_file;
+} MULE_CALLBACKS;
+
+typedef int (*ZLIB_UNCOMPRESS)(unsigned char * dest, unsigned long * dest_len_ptr, const unsigned char * src, unsigned long src_len);
+
+typedef struct _zlib_callbacks {
+  ZLIB_UNCOMPRESS uncompress;
+} ZLIB_CALLBACKS;
+
 
 typedef struct _kad_user_data {
   uint32_t loc_ip4_no;
