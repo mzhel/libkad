@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <memory.h>
+#include <arpa/inet.h>
 #include <uint128.h>
 #include <list.h>
 #include <queue.h>
@@ -1424,6 +1425,7 @@ kad_search_jumpstart_all(
   uint32_t now;
   SEARCH_KEYWORD_RESULT* kwd_res = NULL;
   SEARCH_FILE_RESULT* file_res = NULL;
+  MULE_FILE* mf = NULL;
 
   do {
 
@@ -1605,8 +1607,52 @@ kad_search_jumpstart_all(
                                                                          0,
                                                                          0
                                                                         );
+        // File results handling
+
+      if (kse->file_results && ks->mcbs.session_create_file){
+
+        if (!ks->mcbs.session_create_file(
+                                          &kse->target_id,
+                                          kse->file_name,
+                                          NULL,
+                                          NULL,
+                                          kse->file_size,
+                                          &ks->ccbs,
+                                          &mf
+                                         )
+        ){
+          
+          LOG_ERROR("Failed to create mule file instance.");
+
+          break;
+
+        }
+      }
+
+      // Handle file results.
 
       LIST_EACH_ENTRY_WITH_DATA_BEGIN(kse->file_results, e, file_res);
+
+        if (ks->mcbs.session_add_source_to_file){
+
+          if (!ks->mcbs.session_add_source_to_file(
+                                                   mf,
+                                                   file_res->type,
+                                                   &file_res->id,
+                                                   htonl(file_res->ip4),
+                                                   htons(file_res->tcp_port),
+                                                   htons(file_res->udp_port),
+                                                   file_res->cipher_opts
+                                                  )
+          ){
+
+            LOG_ERROR("Failed to add source to file.");
+
+            break;
+
+          }
+
+        }
 
         if (kse->file_res_cb) kse->file_res_cb(
                                                kse->file_res_cb_arg,
@@ -1635,6 +1681,20 @@ kad_search_jumpstart_all(
                                                                          0,
                                                                          0
                                                                         );
+
+      if (mf && ks->mcbs.session_add_pub_file){
+
+        if (!ks->mcbs.session_add_pub_file(ks->mule_session, mf)){
+
+          LOG_ERROR("Failed to add public file to queue.");
+
+          break;
+
+        }
+
+      }
+
+      // [IMPLEMENT] proper resources release in case of error.
 
       kad_search_destroy(kse);
 
